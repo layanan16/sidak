@@ -44,6 +44,24 @@
   .tbl-t tbody tr:hover td{background:transparent}
   .tbl-t .ba{display:block;text-align:center}
   .tbl-t .ba+.ba{margin-left:0}
+  /* Pratinjau PDF layar penuh (gaya Cetak Laporan Medulu) */
+  .pv{position:fixed;inset:0;z-index:65;display:flex;justify-content:center;background:#0a2463}
+  .pv-col{width:100%;max-width:30rem;height:100%;display:flex;flex-direction:column}
+  .pv-head{display:flex;align-items:center;gap:.6rem;padding:.75rem .75rem .65rem;color:#fff}
+  .pv-t{flex:1;min-width:0}
+  .pv-t1{font-weight:800;font-size:1rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pv-t2{font-size:.7rem;color:#bfdbfe;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pv-ib{width:2.25rem;height:2.25rem;flex:none;border-radius:.6rem;background:#ffffff2e;color:#fff;display:flex;align-items:center;justify-content:center}
+  .pv-ib:hover:not(:disabled){background:#ffffff45}
+  .pv-ib:disabled{opacity:.4;cursor:not-allowed}
+  .pv-area{flex:1;min-height:0;overflow:auto;background:#4b5563;padding:1rem .75rem}
+  .pv-pages{margin:0 auto}
+  .pv-pg{background:#fff;box-shadow:0 6px 18px #00000059;margin-bottom:.75rem}
+  .pv-info{color:#e5e7eb;text-align:center;font-size:.85rem;padding:2rem 1rem}
+  .pv-foot{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;padding:.75rem;padding-bottom:max(.75rem,env(safe-area-inset-bottom));background:#fff}
+  .pv-b{height:2.9rem;border-radius:.8rem;font-weight:800;font-size:.95rem}
+  .pv-b1{background:#eef2f9;color:#1e293b}.pv-b1:hover{background:#e2e8f3}
+  .pv-b2{background:linear-gradient(90deg,#1a56c4,#2f6fe4);color:#fff}.pv-b2:hover{filter:brightness(.95)}
   /* Tabel Data Konstituen: vertikal, scroll ke bawah, judul kolom menempel di atas */
   .tbl-scroll{max-height:60vh;max-height:60dvh;overflow:auto;background:#fff}
   .tbl-v{font-size:.8rem}
@@ -898,7 +916,7 @@ function renderSheet() {
   else if (SHEET === 'jumlah') isiJumlah();
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && SHEET && $('modal').classList.contains('hidden') && $('confirm').classList.contains('hidden')) closeSheet();
+  if (e.key === 'Escape' && SHEET && $('modal').classList.contains('hidden') && $('confirm').classList.contains('hidden') && !pvAktif) closeSheet();
 });
 function isiDiri() {
   const el = $('diri'); if (!el) return;
@@ -1000,29 +1018,132 @@ function pasangBack() {
   window.addEventListener('popstate', () => {
     if (!S || S.role !== 'user') return;
     history.pushState({ sidak: 1 }, '');   // tetap di halaman; keluar hanya setelah dikonfirmasi
+    if (pvAktif) { pvAktif(); return; }       // pratinjau PDF terbuka: Back menutupnya dulu
     if ($('confirm').classList.contains('hidden')) tanyaKeluar();
   });
 }
 
 /* Cetak Data Konstituen -> dokumen PDF, lalu pilih Unduh atau Batal */
 function cetakUser() {
+  const pf = PROFIL || {};
+  printRows('Data Pendataan - ' + (pf.nama || pf.no_hp || ''), filterUser(), false, String((($('cariData') || {}).value) || '').trim());
+}
+/* Pratinjau PDF layar penuh: halaman PDF tampil, zoom +/-, lalu Tutup atau Unduh */
+let pdfjsMuat = null, pvAktif = null;
+function muatPdfJs() {   // pdf.js dimuat hanya saat pratinjau pertama dibuka
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return pdfjsMuat || (pdfjsMuat = new Promise((ok, gagal) => {
+    const v = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    const sc = document.createElement('script');
+    sc.src = v + 'pdf.min.js';
+    sc.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = v + 'pdf.worker.min.js'; ok(window.pdfjsLib); };
+    sc.onerror = () => { pdfjsMuat = null; gagal(new Error('pdf.js gagal dimuat')); };
+    document.head.appendChild(sc);
+  }));
+}
+function dialogPdf({ blob, nama, judul, jumlah, halaman, filter }) {
+  if (pvAktif) pvAktif();
+  const url = URL.createObjectURL(blob), prevOv = document.body.style.overflow;
+  const el = document.createElement('div');
+  el.className = 'pv'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Pratinjau PDF');
+  el.innerHTML = `<div class="pv-col">
+    <div class="pv-head">
+      <button type="button" class="pv-ib" data-a="tutup" aria-label="Tutup pratinjau"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="pv-t"><p class="pv-t1">${esc(judul || nama)}</p>
+        <p class="pv-t2">${jumlah} data &middot; ${halaman} halaman${filter ? ' &middot; hasil pencarian &ldquo;' + esc(filter) + '&rdquo;' : ''}</p></div>
+      <button type="button" class="pv-ib" data-a="kecil" aria-label="Perkecil"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+      <button type="button" class="pv-ib" data-a="besar" aria-label="Perbesar"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+    </div>
+    <div class="pv-area"><div class="pv-pages"><p class="pv-info">Memuat pratinjau...</p></div></div>
+    <div class="pv-foot">
+      <button type="button" class="pv-b pv-b1" data-a="tutup">Tutup</button>
+      <button type="button" class="pv-b pv-b2" data-a="unduh"><i class="fa-solid fa-download mr-1.5"></i>Unduh</button>
+    </div></div>`;
+  document.body.appendChild(el);
+  document.body.style.overflow = 'hidden';
+  const area = el.querySelector('.pv-area'), pages = el.querySelector('.pv-pages');
+  const bK = el.querySelector('[data-a=kecil]'), bB = el.querySelector('[data-a=besar]');
+  let zm = 1, selesai = false, io = null, pdfDoc = null;
+
+  const tutup = () => {
+    if (selesai) return; selesai = true; pvAktif = null;
+    document.removeEventListener('keydown', kd);
+    if (io) io.disconnect(); if (pdfDoc) pdfDoc.destroy();
+    el.remove(); document.body.style.overflow = prevOv;
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
+  const kd = e => { if (e.key === 'Escape') tutup(); };
+  document.addEventListener('keydown', kd);
+  pvAktif = tutup;
+
+  const setZoom = z => {   // zoom lewat lebar halaman; posisi tengah layar dipertahankan
+    z = Math.min(3, Math.max(1, z));
+    const cx = (area.scrollLeft + area.clientWidth / 2) / Math.max(area.scrollWidth, 1);
+    const cy = (area.scrollTop + area.clientHeight / 2) / Math.max(area.scrollHeight, 1);
+    zm = z; pages.style.width = (z * 100) + '%';
+    area.scrollLeft = cx * area.scrollWidth - area.clientWidth / 2;
+    area.scrollTop = cy * area.scrollHeight - area.clientHeight / 2;
+    bK.disabled = z <= 1; bB.disabled = z >= 3;
+  };
+  const unduh = () => {
+    const a = document.createElement('a'); a.href = url; a.download = nama;
+    document.body.appendChild(a); a.click(); a.remove(); toast('PDF diunduh');
+  };
+  el.onclick = e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    ({ tutup, unduh, kecil: () => setZoom(zm - 0.5), besar: () => setZoom(zm + 0.5) })[b.dataset.a]();
+  };
+  setZoom(1);
+
+  const gambar = async d => {   // halaman digambar saat mendekati layar (hemat memori)
+    try {
+      const pg = await pdfDoc.getPage(+d.dataset.p), v0 = pg.getViewport({ scale: 1 }), v = pg.getViewport({ scale: 1300 / v0.width });
+      const c = document.createElement('canvas'); c.width = Math.floor(v.width); c.height = Math.floor(v.height);
+      c.style.cssText = 'display:block;width:100%;height:100%';
+      await pg.render({ canvasContext: c.getContext('2d'), viewport: v }).promise;
+      if (!selesai) d.appendChild(c);
+    } catch (er) { /* halaman gagal digambar: diabaikan */ }
+  };
+  (async () => {
+    try {
+      const pdfjs = await muatPdfJs(), buf = await blob.arrayBuffer();
+      if (selesai) return;
+      pdfDoc = await pdfjs.getDocument({ data: buf }).promise;
+      if (selesai) return;
+      const v1 = (await pdfDoc.getPage(1)).getViewport({ scale: 1 });
+      pages.innerHTML = '';
+      io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { io.unobserve(en.target); gambar(en.target); } }), { root: area, rootMargin: '900px 0px' });
+      for (let i = 1; i <= pdfDoc.numPages; i++) {
+        const d = document.createElement('div');
+        d.className = 'pv-pg'; d.dataset.p = i; d.style.aspectRatio = v1.width + ' / ' + v1.height;
+        pages.appendChild(d); io.observe(d);
+      }
+    } catch (er) {
+      if (!selesai) pages.innerHTML = '<p class="pv-info">Pratinjau tidak dapat ditampilkan. Anda tetap bisa mengunduh PDF.</p>';
+    }
+  })();
+}
+
+/* ---------- Cetak ---------- */
+// Satu pintu untuk semua cetak (user dan admin): buat PDF, lalu tampilkan dialog Unduh / Batal
+function printRows(title, rows, withPendata, filter = '') {
   const J = window.jspdf && window.jspdf.jsPDF;
   const gagal = () => notif('Pustaka PDF belum termuat. Periksa koneksi internet, lalu muat ulang halaman.', 'PDF belum siap');
   if (!J) return gagal();
   const doc = new J({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   if (typeof doc.autoTable !== 'function') return gagal();
-  const rows = filterUser(), q = String((($('cariData') || {}).value) || '').trim(), pf = PROFIL || {};
-  const judul = 'Data Pendataan - ' + (pf.nama || pf.no_hp || '');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(20); doc.text(judul, 15, 15);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
-  doc.text('SIDAK - Dicetak ' + new Date().toLocaleString('id-ID') + ' - Total ' + rows.length + ' data', 15, 20.5);
+  const head = ['No','Nama','JK','No. HP','Kecamatan','Kelurahan','TPS','Hubungan'].concat(withPendata ? ['Pendata'] : []).concat(['Ket.']);
   const body = rows.length
     ? rows.map((d, i) => [i + 1, d.nama || '', d.jenis_kelamin || '', d.no_hp || '', d.kecamatan || '', d.kelurahan || '', d.no_tps || '',
-        d.hubungan || (d.is_diri ? 'Data diri' : '-'), d.ganda ? 'Ganda' : ''])
-    : [[{ content: 'Tidak ada data', colSpan: 9, styles: { halign: 'center' } }]];
+        d.hubungan || (d.is_diri ? 'Data diri' : '-')].concat(withPendata ? [d.pendata_nama || ''] : []).concat([d.ganda ? 'Ganda' : '']))
+    : [[{ content: 'Tidak ada data', colSpan: head.length, styles: { halign: 'center' } }]];
+  const judul = doc.splitTextToSize(title, 270);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(20); doc.text(judul, 15, 15);
+  const y = 15 + (judul.length - 1) * 6;
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
+  doc.text('SIDAK - Dicetak ' + new Date().toLocaleString('id-ID') + ' - Total ' + rows.length + ' data', 15, y + 5.5);
   doc.autoTable({
-    startY: 24, margin: { left: 15, right: 10, bottom: 14 }, theme: 'grid',
-    head: [['No', 'Nama', 'JK', 'No. HP', 'Kecamatan', 'Kelurahan', 'TPS', 'Hubungan', 'Ket.']], body,
+    startY: y + 9, margin: { left: 15, right: 10, bottom: 14 }, theme: 'grid', head: [head], body,
     styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 1.8, lineColor: [68, 68, 68], lineWidth: 0.1, textColor: 20 },
     headStyles: { fillColor: [229, 231, 235], textColor: 20, fontStyle: 'bold' },
     columnStyles: { 0: { cellWidth: 10 } }
@@ -1032,52 +1153,9 @@ function cetakUser() {
     doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120);
     doc.text('Halaman ' + i + ' dari ' + n, 287, 205, { align: 'right' });
   }
-  const slug = String(pf.nama || pf.no_hp || 'user').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'user';
-  dialogPdf({ blob: doc.output('blob'), nama: 'Data-Konstituen-' + slug + '-' + new Date().toISOString().slice(0, 10) + '.pdf',
-    jumlah: rows.length, halaman: n, filter: q });
-}
-function dialogPdf({ blob, nama, jumlah, halaman, filter }) {
-  const url = URL.createObjectURL(blob), c = $('confirm');
-  const kb = blob.size / 1024, ukuran = kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : Math.max(1, Math.round(kb)) + ' KB';
-  c.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
-    <div class="mx-auto w-14 h-14 rounded-full flex items-center justify-center text-2xl bg-red-100 text-red-600"><i class="fa-solid fa-file-pdf"></i></div>
-    <h3 class="font-bold text-lg mt-4">Dokumen PDF siap diunduh</h3>
-    <p class="text-sm font-semibold text-slate-700 mt-1 break-all">${esc(nama)}</p>
-    <p class="text-xs text-slate-500 mt-1">${jumlah} data &middot; ${halaman} halaman &middot; ${ukuran}</p>
-    ${filter ? `<p class="text-xs text-amber-700 mt-1">Hanya hasil pencarian &ldquo;${esc(filter)}&rdquo;</p>` : ''}
-    <a href="${url}" target="_blank" rel="noopener" class="inline-block mt-3 text-sm font-semibold text-blue-700 hover:underline"><i class="fa-regular fa-eye mr-1"></i>Lihat pratinjau</a>
-    <div class="flex gap-2 mt-5">
-      <button id="pn" type="button" class="flex-1 rounded-lg border border-slate-300 py-2.5 font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
-      <a id="py" href="${url}" download="${esc(nama)}" class="flex-1 rounded-lg py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700"><i class="fa-solid fa-download mr-1"></i>Unduh</a></div></div>`;
-  c.classList.remove('hidden'); c.classList.add('flex');
-  const tutup = () => { c.classList.add('hidden'); c.classList.remove('flex'); c.innerHTML = ''; document.removeEventListener('keydown', kd); setTimeout(() => URL.revokeObjectURL(url), 60000); };
-  const kd = e => { if (e.key === 'Escape') tutup(); };
-  document.addEventListener('keydown', kd);
-  c.onclick = e => { if (e.target === c) tutup(); };
-  $('pn').onclick = tutup;
-  $('py').onclick = () => setTimeout(() => { tutup(); toast('PDF diunduh'); }, 300);   // tunda agar unduhan sempat dimulai
-  $('py').focus();
-}
-
-/* ---------- Cetak ---------- */
-function printRows(title, rows, withPendata) {
-  const head = ['No','Nama','JK','No. HP','Kecamatan','Kelurahan','TPS','Hubungan'].concat(withPendata ? ['Pendata'] : []).concat(['Ket.']);
-  const body = rows.map((d, i) => `<tr><td>${i+1}</td><td>${esc(d.nama)}</td><td>${d.jenis_kelamin||''}</td>
-    <td>${esc(d.no_hp||'')}</td><td>${esc(d.kecamatan)}</td><td>${esc(d.kelurahan)}</td>
-    <td>${esc(d.no_tps||'')}</td><td>${esc(d.hubungan || (d.is_diri ? 'Data diri' : '-'))}</td>${withPendata ? `<td>${esc(d.pendata_nama||'')}</td>` : ''}
-    <td>${d.ganda ? 'Ganda' : ''}</td></tr>`).join('') || `<tr><td colspan="${head.length}" align="center">Tidak ada data</td></tr>`;
-  const f = document.createElement('iframe');
-  f.style.cssText = 'position:fixed;left:-10000px;top:0;width:297mm;height:210mm;border:0';
-  document.body.appendChild(f);
-  f.contentDocument.write(`<html><head><title>${esc(title)}</title><style>
-    body{margin:0;font-family:Arial,sans-serif;font-size:11px} h2{margin:0 0 4px} p{margin:0 0 10px;color:#555}
-    table{border-collapse:collapse;width:100%} th,td{border:1px solid #444;padding:4px;text-align:left} th{background:#e5e7eb}
-    @page{size:A4 landscape;margin:1.5cm 1cm 1cm 1.5cm}</style></head><body>
-    <h2>${esc(title)}</h2><p>SIDAK - Dicetak ${new Date().toLocaleString('id-ID')} - Total ${rows.length} data</p>
-    <table><thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></body></html>`);
-  f.contentDocument.close();
-  f.contentWindow.focus(); f.contentWindow.print();
-  setTimeout(() => f.remove(), 2000);
+  const slug = String(title).replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60) || 'Data';
+  dialogPdf({ blob: doc.output('blob'), nama: slug + '-' + new Date().toISOString().slice(0, 10) + '.pdf',
+    judul: title, jumlah: rows.length, halaman: n, filter });
 }
 </script>
 </body>
