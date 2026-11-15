@@ -248,7 +248,7 @@
     <section id="sec-pendataan" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
       <div class="bg-gradient-to-br from-green-700 to-green-500 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-user-plus mr-2"></i>Pendataan</h2></div>
       <div class="px-4 py-4">
-      <div id="formPendataan" class="max-w-md"></div>
+      <div id="formPendataan" class="max-w-md md:max-w-none"></div>
     </div></div></section>
 
     <section id="sec-data" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
@@ -258,12 +258,12 @@
         <div class="relative flex-1 min-w-0">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input id="cariData" class="inp pl-9" placeholder="Cari data (nama, NIK, kelurahan, hubungan)" oninput="renderUser()"></div>
-        <button type="button" class="btn btn-b whitespace-nowrap md:hidden" onclick="cetakUser()"><i class="fa-solid fa-print mr-1"></i>Cetak</button>
+        <button type="button" class="btn btn-b whitespace-nowrap" onclick="cetakUser()"><i class="fa-solid fa-print mr-1 md:hidden"></i><i class="fa-solid fa-file-pdf mr-1 hidden md:inline"></i><span class="md:hidden">Cetak</span><span class="hidden md:inline">Unduh pdf</span></button>
       </div>
       <div id="wrapData" class="tbl-wrap tbl-scroll mt-3"><table class="tbl tbl-v">
         <thead><tr><th>Nama</th><th>Kel.</th><th>TPS</th><th>Aksi</th></tr></thead>
         <tbody id="dataBody"></tbody></table></div>
-      <div class="hidden md:flex mt-2 items-center justify-between gap-2"><button type="button" class="w-9 h-9 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center" onclick="cetakUser()" title="Cetak data" aria-label="Cetak data"><i class="fa-solid fa-print"></i></button><div id="navDataV"></div></div>
+      <div class="hidden md:flex mt-2 items-center justify-end"><div id="navDataV"></div></div>
     </div></div></section>
   </main>
   <footer class="text-center text-xs text-slate-500 py-6">Powered by Anto Design Concept &copy; 2026</footer>
@@ -438,7 +438,7 @@ const HUBUNGAN = ['Istri','Anak','Ponakan','Saudara','Keluarga dalam rumah','Kel
 function openForm({ title, keys, vals = {}, readonly = [], closable = true, dua = false, cari = false, catatan = '', onSave, inline = '', onSelesai, bertahap = false }) {
   // inline = id wadah di halaman (tanpa modal); tanpa inline = tampil sebagai modal
   const host = inline ? $(inline) : $('modal');
-  const kelas = inline ? 'space-y-3' : 'bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-5 space-y-3';
+  const kelas = inline ? 'space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-3 md:items-start' : 'bg-white rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto p-5 space-y-3';
   const kepala = inline ? '' : `<div class="flex justify-between items-center"><h3 class="font-bold text-lg">${esc(title)}</h3>
       ${closable ? '<button type="button" data-x class="text-slate-500 text-xl">&times;</button>' : ''}</div>`;
   host.innerHTML = `<form class="${kelas}">${kepala}
@@ -458,11 +458,11 @@ function openForm({ title, keys, vals = {}, readonly = [], closable = true, dua 
       }
       else if (ty === 'hub') el = `<select name="${k}" class="inp" required><option value="">Pilih...</option>${HUBUNGAN.map(o => `<option ${v===o?'selected':''}>${o}</option>`).join('')}</select>`;
       else el = `<input name="${k}" type="${ty}" value="${esc(v)}" class="inp ${ro?'bg-slate-100':''}" ${ro} ${req} ${k==='nik'?'inputmode="numeric" maxlength="16" pattern="\\d{16}" title="NIK harus 16 digit angka"':''}>`;
-      return `<div data-f="${k}"><label class="text-sm font-semibold">${lb}</label>${el}${k === 'nik' && cari ? '<div data-prev class="hidden"></div>' : ''}</div>`;
+      return `<div data-f="${k}"><label class="text-sm font-semibold">${lb}</label>${el}</div>${k === 'nik' && cari ? '<div class="md:col-span-3 md:order-1"><div data-prev class="hidden"></div></div>' : ''}`;
     }).join('')}
-    <p data-msg class="text-sm text-red-600"></p>
+    ${inline ? '<div class="space-y-3 md:col-span-3 md:order-2">' : ''}<p data-msg class="text-sm text-red-600"></p>
     ${dua ? '<div class="grid grid-cols-2 gap-2"><button type="submit" value="selesai" class="btn" title="Simpan &amp; selesai" aria-label="Simpan dan selesai"><i class="fa-solid fa-check mr-1"></i>Selesai</button><button type="submit" value="tambah" class="btn btn-b" title="Simpan &amp; tambah" aria-label="Simpan dan tambah"><i class="fa-solid fa-plus mr-1"></i>Tambah</button></div>'
-          : '<button class="btn w-full">Simpan</button>'}${!closable ? '<button type="button" class="w-full text-sm text-slate-500 underline" onclick="keluar()">Keluar</button>' : ''}</form>`;
+          : '<button class="btn w-full">Simpan</button>'}${!closable ? '<button type="button" class="w-full text-sm text-slate-500 underline" onclick="keluar()">Keluar</button>' : ''}${inline ? '</div>' : ''}</form>`;
   const f = host.querySelector('form'), msgEl = f.querySelector('[data-msg]'), prev = f.querySelector('[data-prev]');
   if (!inline) {
     host.classList.remove('hidden'); host.classList.add('flex');
@@ -521,24 +521,24 @@ function pasangCariNik(f, bertahap) {
     const v = el.value.trim(); box.className = 'hidden'; buka(false);
     if (v.length !== 16) return;
     const saya = ++urut;
-    box.className = 'mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-500';
+    box.className = 'rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-500';
     box.textContent = 'Mencari di data master...';
     try {
       const r = await rpc('cari_nik', { ...ua(), p_nik: v });
       if (saya !== urut) return;
       if (!r) {
-        box.className = 'mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700';
+        box.className = 'rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700';
         box.innerHTML = '<i class="fa-solid fa-circle-xmark mr-1"></i>NIK tidak ditemukan di data master.';
         return;
       }
-      box.className = 'mt-2 rounded-lg border border-green-200 bg-green-50 p-3 text-sm';
+      box.className = 'rounded-lg border border-green-200 bg-green-50 p-3 text-sm';
       box.innerHTML = `<p class="font-bold text-green-800"><i class="fa-solid fa-circle-check mr-1"></i>${esc(r.nama)}</p>
         <p class="text-slate-600">${r.jenis_kelamin === 'L' ? 'Laki-laki' : r.jenis_kelamin === 'P' ? 'Perempuan' : '-'} &middot; TPS ${esc(r.no_tps || '-')}</p>
         <p class="text-slate-600">${esc(r.alamat || '-')}, Kel. ${esc(r.kelurahan || '-')}, Kec. ${esc(r.kecamatan || '-')}</p>`;
       buka(true);
     } catch (er) {
       if (saya !== urut) return;
-      box.className = 'mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700';
+      box.className = 'rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700';
       box.textContent = 'Gagal mencari data master: ' + (er.message || '');
     }
   };
