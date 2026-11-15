@@ -27,6 +27,8 @@
   .tbl tbody tr:last-child td{border-bottom:0}
   /* ukuran huruf seragam untuk seluruh isi tabel */
   .tbl th,.tbl td,.tbl th *,.tbl td *{font-size:.8rem}
+  /* satu ukuran huruf untuk seluruh isi halaman utama (admin & user) */
+  #v-admin main,#v-user main,#v-admin main *:not(i),#v-user main *:not(i){font-size:.8rem}
   .tbl tbody tr:hover td{background:#f8fafc}
   .ba{display:inline-block;padding:.35rem .8rem;border-radius:.5rem;font-size:.75rem;font-weight:700;color:#fff;white-space:nowrap}
   .ba+.ba{margin-left:.4rem}
@@ -110,8 +112,8 @@
 <!-- B. LOGIN -->
 <section id="v-login" class="hidden min-h-screen flex flex-col p-4 abstrak">
   <div class="flex-1 flex items-center justify-center w-full">
-  <div class="w-full max-w-sm bg-white/70 backdrop-blur rounded-2xl shadow-xl p-6">
-    <img class="js-logo mx-auto mb-4 w-[11.25rem] h-[11.25rem] max-w-full object-contain" alt="SIDAK">
+  <div class="w-full max-w-sm bg-white/70 backdrop-blur rounded-2xl shadow-xl px-6 pb-6 pt-3">
+    <img class="js-logo mx-auto -mt-2 -mb-3 w-[11.25rem] h-[11.25rem] max-w-full object-contain" alt="SIDAK">
     <div class="flex items-center gap-3 mb-3"><span class="flex-1 h-px bg-slate-300"></span><span class="text-sm font-semibold text-slate-500">Login sebagai</span><span class="flex-1 h-px bg-slate-300"></span></div>
     <div class="grid grid-cols-2 gap-2 mb-3" role="radiogroup" aria-label="Login sebagai"><label class="cursor-pointer"><input type="radio" name="role" value="admin" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user-shield"></i>Admin</span></label><label class="cursor-pointer"><input type="radio" name="role" value="user" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user"></i>User</span></label></div>
     <div id="blk-admin" class="hidden mb-3"><label class="text-sm font-semibold">Password</label>
@@ -151,8 +153,9 @@
     </div>
 
     <!-- Kelola Pendata (menyatu dengan halaman, tanpa latar) -->
-    <section id="a-kelola" class="hidden">
-      <h2 class="font-bold mb-3"><i class="fa-solid fa-users-gear text-blue-700 mr-2"></i>Kelola Pendata</h2>
+    <section id="a-kelola" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
+      <div class="bg-gradient-to-br from-blue-600 to-blue-400 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-users-gear mr-2"></i>Kelola Pendata</h2></div>
+      <div class="px-4 py-4">
       <button class="btn" onclick="formPendata()"><i class="fa-solid fa-plus mr-1"></i>Tambah Pendata</button>
       <div class="relative my-3">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -161,11 +164,12 @@
         <thead><tr><th>Nama</th><th>No. HP</th><th>Status</th></tr></thead>
         <tbody id="pendataBody"></tbody></table></div>
       <p class="text-xs text-slate-500 mt-2">Ketuk baris untuk melihat rincian pendata.</p>
-    </section>
+    </div></div></section>
 
     <!-- Data Konstituen (menyatu dengan halaman, tanpa latar) -->
-    <section id="a-kons" class="hidden">
-      <h2 class="font-bold mb-3"><i class="fa-solid fa-table-list text-blue-700 mr-2"></i>Data Konstituen</h2>
+    <section id="a-kons" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
+      <div class="bg-gradient-to-br from-indigo-600 to-indigo-400 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-table-list mr-2"></i>Data Konstituen</h2></div>
+      <div class="px-4 py-4">
       <div class="relative">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
         <input id="cariKons" type="text" autocomplete="off" class="inp pl-9 pr-10" placeholder="Cari data (nama, NIK, pendata, wilayah, TPS)" oninput="renderKons()">
@@ -178,13 +182,14 @@
           <select id="fPot" class="inp mt-1 font-normal text-sm" onchange="renderKons()"><option value="semua">Semua</option><option value="Tinggi">Tinggi</option><option value="Sedang">Sedang</option><option value="Rendah">Rendah</option></select></label>
       </div>
       <div id="konsBody" class="mt-3"></div>
-    </section>
+    </div></div></section>
 
     <section id="a-statistik" class="hidden"></section>
 
     <!-- Cetak Data (Unduh Data) -->
-    <section id="a-cetak" class="hidden bg-white rounded-2xl shadow p-4">
-      <h2 class="font-bold mb-3"><i class="fa-solid fa-download text-blue-700 mr-2"></i>Unduh Data</h2>
+    <section id="a-cetak" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
+      <div class="bg-gradient-to-br from-green-700 to-green-500 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-download mr-2"></i>Unduh Data</h2></div>
+      <div class="px-4 py-4">
       <div class="grid sm:grid-cols-3 gap-2">
         <select id="by" class="inp" onchange="fillVal()">
           <option value="">Semua data</option><option value="pendata_nama">Pendata</option>
@@ -199,7 +204,7 @@
         <select id="wTps" class="inp" onchange="fillWil('tps')" aria-label="TPS"></select>
       </div>
       <p id="cetakInfo" class="text-xs text-slate-500 mt-2"></p>
-    </section>
+    </div></div></section>
   </main>
   <footer class="text-center text-xs text-slate-500 py-6">Powered by Anto Design Concept &copy; 2026</footer>
 </section>
@@ -225,13 +230,15 @@
 
     <section id="sec-jumlah" class="hidden"></section>
 
-    <section id="sec-pendataan" class="hidden">
-      <h2 class="font-bold mb-3"><i class="fa-solid fa-user-plus text-blue-700 mr-2"></i>Pendataan</h2>
+    <section id="sec-pendataan" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
+      <div class="bg-gradient-to-br from-green-700 to-green-500 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-user-plus mr-2"></i>Pendataan</h2></div>
+      <div class="px-4 py-4">
       <div id="formPendataan" class="max-w-md"></div>
-    </section>
+    </div></div></section>
 
-    <section id="sec-data" class="hidden">
-      <h2 class="font-bold mb-3"><i class="fa-solid fa-table-list text-blue-700 mr-2"></i>Data Konstituen</h2>
+    <section id="sec-data" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
+      <div class="bg-gradient-to-br from-indigo-600 to-indigo-400 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-table-list mr-2"></i>Data Konstituen</h2></div>
+      <div class="px-4 py-4">
       <div class="flex gap-2">
         <div class="relative flex-1 min-w-0">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
@@ -241,7 +248,7 @@
       <div class="tbl-wrap tbl-scroll mt-3"><table class="tbl tbl-v">
         <thead><tr><th>Nama</th><th>Kel.</th><th>TPS</th><th>Aksi</th></tr></thead>
         <tbody id="dataBody"></tbody></table></div>
-    </section>
+    </div></div></section>
   </main>
   <footer class="text-center text-xs text-slate-500 py-6">Powered by Anto Design Concept &copy; 2026</footer>
 </section>
