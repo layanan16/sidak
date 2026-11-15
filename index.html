@@ -110,10 +110,10 @@
 <!-- B. LOGIN -->
 <section id="v-login" class="hidden min-h-screen flex flex-col p-4 abstrak">
   <div class="flex-1 flex items-center justify-center w-full">
-  <div class="w-full max-w-sm bg-white/90 backdrop-blur rounded-2xl shadow-xl p-6">
-    <img class="js-logo mx-auto mb-5 w-56 max-w-full max-h-56 object-contain" alt="SIDAK">
-    <label class="text-sm font-semibold">Masuk sebagai</label>
-    <div class="grid grid-cols-2 gap-2 mb-3" role="radiogroup" aria-label="Masuk sebagai"><label class="cursor-pointer"><input type="radio" name="role" value="admin" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user-shield"></i>Admin</span></label><label class="cursor-pointer"><input type="radio" name="role" value="user" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user"></i>User</span></label></div>
+  <div class="w-full max-w-sm bg-white/70 backdrop-blur rounded-2xl shadow-xl p-6">
+    <img class="js-logo mx-auto mb-4 w-[11.25rem] h-[11.25rem] max-w-full object-contain" alt="SIDAK">
+    <div class="flex items-center gap-3 mb-3"><span class="flex-1 h-px bg-slate-300"></span><span class="text-sm font-semibold text-slate-500">Login sebagai</span><span class="flex-1 h-px bg-slate-300"></span></div>
+    <div class="grid grid-cols-2 gap-2 mb-3" role="radiogroup" aria-label="Login sebagai"><label class="cursor-pointer"><input type="radio" name="role" value="admin" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user-shield"></i>Admin</span></label><label class="cursor-pointer"><input type="radio" name="role" value="user" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user"></i>User</span></label></div>
     <div id="blk-admin" class="hidden mb-3"><label class="text-sm font-semibold">Password</label>
       <div class="relative mb-0"><input id="pAdmin" type="password" class="inp pr-11" autocomplete="current-password"><button type="button" class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-500 hover:text-slate-800" onclick="toggleEye('pAdmin',this)" aria-label="Lihat password"><i class="fa-regular fa-eye"></i></button></div></div>
     <div id="blk-hp" class="hidden mb-3"><label class="text-sm font-semibold">Nomor Telepon</label>
@@ -145,7 +145,7 @@
       <div class="grid grid-cols-4 gap-1.5 max-w-2xl">
         <button type="button" class="fitur" data-fitur="kelola" aria-pressed="false" onclick="pilihFiturAdmin('kelola')"><span class="fitur-ic bg-gradient-to-br from-blue-600 to-blue-400"><i class="fa-solid fa-users-gear"></i></span><span class="fitur-lb">Kelola Pendata</span></button>
         <button type="button" class="fitur" data-fitur="kons" aria-pressed="false" onclick="pilihFiturAdmin('kons')"><span class="fitur-ic bg-gradient-to-br from-indigo-600 to-indigo-400"><i class="fa-solid fa-table-list"></i></span><span class="fitur-lb">Data Konstituen</span></button>
-        <button type="button" class="fitur" onclick="openSheet('statistik')"><span class="fitur-ic bg-gradient-to-br from-amber-600 to-amber-400"><i class="fa-solid fa-chart-pie"></i></span><span class="fitur-lb">Data Statistik</span></button>
+        <button type="button" class="fitur" data-fitur="statistik" aria-pressed="false" onclick="pilihFiturAdmin('statistik')"><span class="fitur-ic bg-gradient-to-br from-amber-600 to-amber-400"><i class="fa-solid fa-chart-pie"></i></span><span class="fitur-lb">Data Statistik</span></button>
         <button type="button" class="fitur" data-fitur="cetak" aria-pressed="false" onclick="pilihFiturAdmin('cetak')"><span class="fitur-ic bg-gradient-to-br from-green-700 to-green-500"><i class="fa-solid fa-download"></i></span><span class="fitur-lb">Unduh Data</span></button>
       </div>
     </div>
@@ -180,6 +180,8 @@
       <div id="konsBody" class="mt-3"></div>
     </section>
 
+    <section id="a-statistik" class="hidden"></section>
+
     <!-- Cetak Data (Unduh Data) -->
     <section id="a-cetak" class="hidden bg-white rounded-2xl shadow p-4">
       <h2 class="font-bold mb-3"><i class="fa-solid fa-download text-blue-700 mr-2"></i>Unduh Data</h2>
@@ -205,19 +207,23 @@
 <!-- D. USER -->
 <section id="v-user" class="hidden min-h-screen flex flex-col">
   <div class="js-header"></div>
-  <main class="w-full max-w-3xl mx-auto flex-1 p-4 space-y-7">
+  <main class="w-full max-w-5xl mx-auto flex-1 p-4 space-y-7">
     <div>
       <div class="flex items-center justify-between mb-2">
         <h2 class="font-bold"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
         <button type="button" class="w-9 h-9 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center" onclick="tanyaKeluar()" title="Keluar" aria-label="Keluar"><i class="fa-solid fa-right-from-bracket"></i></button>
       </div>
       <div class="grid grid-cols-4 gap-1.5">
-        <button type="button" class="fitur" onclick="openSheet('diri')"><span class="fitur-ic bg-gradient-to-br from-blue-600 to-blue-400"><i class="fa-solid fa-id-card"></i></span><span class="fitur-lb">Data Diri</span></button>
-        <button type="button" class="fitur" onclick="openSheet('jumlah')"><span class="fitur-ic bg-gradient-to-br from-amber-600 to-amber-400"><i class="fa-solid fa-chart-simple"></i></span><span class="fitur-lb">Jumlah Data</span></button>
+        <button type="button" class="fitur" data-fitur="diri" aria-pressed="false" onclick="pilihFitur('diri')"><span class="fitur-ic bg-gradient-to-br from-blue-600 to-blue-400"><i class="fa-solid fa-id-card"></i></span><span class="fitur-lb">Data Diri</span></button>
+        <button type="button" class="fitur" data-fitur="jumlah" aria-pressed="false" onclick="pilihFitur('jumlah')"><span class="fitur-ic bg-gradient-to-br from-amber-600 to-amber-400"><i class="fa-solid fa-chart-simple"></i></span><span class="fitur-lb">Jumlah Data</span></button>
         <button type="button" class="fitur" data-fitur="pendataan" aria-pressed="false" onclick="pilihFitur('pendataan')"><span class="fitur-ic bg-gradient-to-br from-green-700 to-green-500"><i class="fa-solid fa-user-plus"></i></span><span class="fitur-lb">Pendataan</span></button>
         <button type="button" class="fitur" data-fitur="data" aria-pressed="false" onclick="pilihFitur('data')"><span class="fitur-ic bg-gradient-to-br from-indigo-600 to-indigo-400"><i class="fa-solid fa-table-list"></i></span><span class="fitur-lb">Konstituen</span></button>
       </div>
     </div>
+
+    <section id="sec-diri" class="hidden"></section>
+
+    <section id="sec-jumlah" class="hidden"></section>
 
     <section id="sec-pendataan" class="hidden">
       <h2 class="font-bold mb-3"><i class="fa-solid fa-user-plus text-blue-700 mr-2"></i>Pendataan</h2>
@@ -278,7 +284,7 @@ function headerHTML(tgl = true, mw = 'max-w-5xl') {
       ${tgl ? '<p class="js-date text-xs sm:text-sm text-blue-100"></p>' : ''}
     </div></header>`;
 }
-document.querySelectorAll('.js-header').forEach(h => { const u = !!h.closest('#v-user'); h.innerHTML = headerHTML(u, u ? 'max-w-3xl' : 'max-w-5xl'); });   // tanggal di header hanya untuk User; di Admin tanggal + Keluar ada di badan halaman
+document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML(!!h.closest('#v-user')));   // tanggal di header hanya untuk User; di Admin tanggal + Keluar ada di badan halaman
 function tick() {
   const d = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   document.querySelectorAll('.js-date').forEach(e => e.textContent = d);
@@ -780,11 +786,14 @@ async function hapusGanda(id) {
 let AFITUR = '';
 function pilihFiturAdmin(k) {
   AFITUR = AFITUR === k ? '' : k;
-  ['kelola', 'kons', 'cetak'].forEach(x => $('a-' + x).classList.toggle('hidden', x !== AFITUR));
+  ['kelola', 'kons', 'statistik', 'cetak'].forEach(x => $('a-' + x).classList.toggle('hidden', x !== AFITUR));
   document.querySelectorAll('#v-admin [data-fitur]').forEach(b => {
     const on = b.dataset.fitur === AFITUR;
     b.classList.toggle('aktif', on); b.setAttribute('aria-pressed', String(on));
   });
+  SEKSI = AFITUR === 'statistik' ? 'statistik' : '';
+  $('a-statistik').innerHTML = '';
+  if (SEKSI) isiSeksi('statistik', 'a-statistik');
   if (AFITUR === 'kons') renderKons();
   if (AFITUR) $('a-' + AFITUR).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
@@ -922,7 +931,7 @@ function cetakPendata(id) {
 
 /* ---------- USER ---------- */
 const ua = () => ({ p_hp: S.hp, p_pass: S.pass });
-let SUM = null, SHEET = '';
+let SUM = null, SHEET = '', SEKSI = '';
 async function loadUser(silent) {
   try {
     PROFIL = await rpc('user_profil', ua());
@@ -1006,10 +1015,22 @@ function closeSheet() {
   document.body.style.overflow = '';
 }
 function renderSheet() {
-  if (SHEET === 'diri') isiDiri();
-  else if (SHEET === 'jumlah') isiJumlah();
-  else if (SHEET === 'statistik') isiStatistik();
-  else if (SHEET === 'pendata') isiPendataSheet();
+  [SHEET, SEKSI].forEach(k => {
+    if (k === 'diri') isiDiri();
+    else if (k === 'jumlah') isiJumlah();
+    else if (k === 'statistik') isiStatistik();
+    else if (k === 'pendata') isiPendataSheet();
+  });
+}
+// Seksi di halaman dengan isi yang sama seperti modal; warna judul mengikuti warna tombol fiturnya
+const SEKSI_WARNA = { diri: 'from-blue-600 to-blue-400', jumlah: 'from-amber-600 to-amber-400', statistik: 'from-amber-600 to-amber-400' };
+function isiSeksi(k, host) {
+  const c = SHEETS[k];
+  $(host).innerHTML = `<div class="bg-white rounded-2xl shadow overflow-hidden">
+    <div class="bg-gradient-to-br ${SEKSI_WARNA[k]} text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid ${c.ikon} mr-2"></i>${c.judul}</h2></div>
+    <div class="px-4 py-4">${c.body()}</div>
+    ${c.foot ? `<div class="px-4 py-4 border-t border-slate-100">${c.foot}</div>` : ''}</div>`;
+  c.init();
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && SHEET && $('modal').classList.contains('hidden') && $('confirm').classList.contains('hidden') && !pvAktif) closeSheet();
@@ -1071,15 +1092,18 @@ function formData(i) {
 let FITUR = '';
 function pilihFitur(k) {
   FITUR = FITUR === k ? '' : k;
-  ['pendataan', 'data'].forEach(x => $('sec-' + x).classList.toggle('hidden', x !== FITUR));
-  document.querySelectorAll('[data-fitur]').forEach(b => {
+  ['diri', 'jumlah', 'pendataan', 'data'].forEach(x => $('sec-' + x).classList.toggle('hidden', x !== FITUR));
+  document.querySelectorAll('#v-user [data-fitur]').forEach(b => {
     const on = b.dataset.fitur === FITUR;
     b.classList.toggle('aktif', on); b.setAttribute('aria-pressed', String(on));
   });
+  SEKSI = (FITUR === 'diri' || FITUR === 'jumlah') ? FITUR : '';
+  ['diri', 'jumlah'].forEach(x => { if (x !== SEKSI) $('sec-' + x).innerHTML = ''; });
+  if (SEKSI) isiSeksi(SEKSI, 'sec-' + SEKSI);
   $('formPendataan').innerHTML = '';
   if (FITUR === 'pendataan') formPendataan();
   if (FITUR === 'data') renderUser();
-  if (FITUR) $('sec-' + (FITUR === 'data' ? 'data' : 'pendataan')).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (FITUR) $('sec-' + FITUR).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 function formPendataan() {
   openForm({
