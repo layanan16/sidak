@@ -98,7 +98,7 @@
 <!-- A. SPLASH -->
 <div id="splash" class="fixed inset-0 z-50 abstrak transition-transform duration-700 ease-in-out">
   <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-<img class="js-logo w-[11.25rem] h-[11.25rem] object-contain" alt="https://res.cloudinary.com/q7sznixw/image/upload/v1791355406/Logo_SIDAK_Data_Konstituen_i9hub5.webp">
+<img class="js-logo w-[11.25rem] h-[11.25rem] object-contain" alt="SIDAK">
   </div>
   <p class="absolute bottom-4 w-full text-center text-xs text-slate-500">Powered by Anto Design Concept &copy; 2026</p>
 </div>
@@ -107,7 +107,7 @@
 <section id="v-login" class="hidden min-h-screen flex flex-col p-4 abstrak">
   <div class="flex-1 flex items-center justify-center w-full">
   <div class="w-full max-w-sm bg-white/90 backdrop-blur rounded-2xl shadow-xl p-6">
-    <img class="js-logo mx-auto mb-5 w-56 max-w-full max-h-56 object-contain" alt="https://res.cloudinary.com/q7sznixw/image/upload/v1791355406/Logo_SIDAK_Data_Konstituen_i9hub5.webp">
+    <img class="js-logo mx-auto mb-5 w-56 max-w-full max-h-56 object-contain" alt="SIDAK">
     <label class="text-sm font-semibold">Masuk sebagai</label>
     <div class="grid grid-cols-2 gap-2 mb-3" role="radiogroup" aria-label="Masuk sebagai"><label class="cursor-pointer"><input type="radio" name="role" value="admin" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user-shield"></i>Admin</span></label><label class="cursor-pointer"><input type="radio" name="role" value="user" class="peer sr-only" onchange="setRole()"><span class="flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-2.5 font-semibold text-slate-600 hover:bg-slate-50 peer-checked:border-green-700 peer-checked:bg-green-700 peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-green-600"><i class="fa-solid fa-user"></i>User</span></label></div>
     <div id="blk-admin" class="hidden mb-3"><label class="text-sm font-semibold">Password</label>
@@ -131,19 +131,57 @@
 <section id="v-admin" class="hidden min-h-screen flex flex-col">
   <div class="js-header"></div>
   <main class="w-full max-w-5xl mx-auto flex-1 p-4 space-y-5">
-    <div id="cards" class="grid grid-cols-6 gap-2 md:gap-3"></div>
-    <p id="cardFilter" class="text-xs text-slate-500 -mt-2"></p>
+    <div class="flex items-center justify-between">
+      <p class="js-date text-sm font-semibold text-slate-600"></p>
+      <button type="button" class="w-9 h-9 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center" onclick="tanyaKeluar()" title="Keluar" aria-label="Keluar"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
 
-    <div class="bg-white rounded-2xl shadow p-4">
-      <button type="button" data-toggle="bodyCetak" class="w-full flex items-center justify-between text-left" onclick="toggleSeksi('bodyCetak',this)" aria-expanded="false">
-        <span class="font-bold"><i class="fa-solid fa-print text-blue-700 mr-2"></i>Cetak Data</span>
-        <i data-chev="bodyCetak" class="fa-solid fa-chevron-up text-slate-500 transition-transform" style="transform:rotate(180deg)"></i>
-      </button>
-      <div id="bodyCetak" class="hidden mt-3"><div class="grid sm:grid-cols-3 gap-2">
+    <div>
+      <h2 class="font-bold mb-2"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
+      <div class="grid grid-cols-4 gap-1.5 max-w-2xl">
+        <button type="button" class="fitur" data-fitur="kelola" aria-pressed="false" onclick="pilihFiturAdmin('kelola')"><span class="fitur-ic bg-gradient-to-br from-blue-600 to-blue-400"><i class="fa-solid fa-users-gear"></i></span><span class="fitur-lb">Kelola Pendata</span></button>
+        <button type="button" class="fitur" data-fitur="kons" aria-pressed="false" onclick="pilihFiturAdmin('kons')"><span class="fitur-ic bg-gradient-to-br from-indigo-600 to-indigo-400"><i class="fa-solid fa-table-list"></i></span><span class="fitur-lb">Data Konstituen</span></button>
+        <button type="button" class="fitur" onclick="openSheet('statistik')"><span class="fitur-ic bg-gradient-to-br from-amber-600 to-amber-400"><i class="fa-solid fa-chart-pie"></i></span><span class="fitur-lb">Data Statistik</span></button>
+        <button type="button" class="fitur" data-fitur="cetak" aria-pressed="false" onclick="pilihFiturAdmin('cetak')"><span class="fitur-ic bg-gradient-to-br from-green-700 to-green-500"><i class="fa-solid fa-download"></i></span><span class="fitur-lb">Unduh Data</span></button>
+      </div>
+    </div>
+
+    <!-- Kelola Pendata (menyatu dengan halaman, tanpa latar) -->
+    <section id="a-kelola" class="hidden">
+      <h2 class="font-bold mb-3"><i class="fa-solid fa-users-gear text-blue-700 mr-2"></i>Kelola Pendata</h2>
+      <button class="btn" onclick="formPendata()"><i class="fa-solid fa-plus mr-1"></i>Tambah Pendata</button>
+      <div class="relative my-3">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input id="cariPendata" class="inp pl-9" placeholder="Cari pendata (nama atau nomor telepon)" oninput="renderPendata()"></div>
+      <div id="wrapPendata" class="tbl-wrap"><table class="tbl tbl-t whitespace-nowrap">
+        <tbody id="pendataBody"></tbody></table></div>
+      <div id="navPendata" class="mt-2"></div>
+    </section>
+
+    <!-- Data Konstituen (menyatu dengan halaman, tanpa latar) -->
+    <section id="a-kons" class="hidden">
+      <h2 class="font-bold mb-3"><i class="fa-solid fa-table-list text-blue-700 mr-2"></i>Data Konstituen</h2>
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input id="cariKons" type="text" autocomplete="off" class="inp pl-9 pr-10" placeholder="Cari data (nama, NIK, pendata, wilayah, TPS)" oninput="renderKons()">
+        <button id="cariKonsX" type="button" class="hidden absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-700" onclick="hapusCariKons()" aria-label="Hapus pencarian"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="grid grid-cols-2 gap-2 mt-2">
+        <label class="text-xs font-semibold text-slate-600">Keadaan Data
+          <select id="fKead" class="inp mt-1 font-normal text-sm" onchange="renderKons()"><option value="semua">Semua</option><option value="ganda">Ganda</option><option value="bersih">Bersih</option></select></label>
+        <label class="text-xs font-semibold text-slate-600">Potensial
+          <select id="fPot" class="inp mt-1 font-normal text-sm" onchange="renderKons()"><option value="semua">Semua</option><option value="Tinggi">Tinggi</option><option value="Sedang">Sedang</option><option value="Rendah">Rendah</option></select></label>
+      </div>
+      <div id="konsBody" class="mt-3"></div>
+    </section>
+
+    <!-- Cetak Data (Unduh Data) -->
+    <section id="a-cetak" class="hidden bg-white rounded-2xl shadow p-4">
+      <h2 class="font-bold mb-3"><i class="fa-solid fa-print text-blue-700 mr-2"></i>Cetak Data</h2>
+      <div class="grid sm:grid-cols-3 gap-2">
         <select id="by" class="inp" onchange="fillVal()">
           <option value="">Semua data</option><option value="pendata_nama">Pendata</option>
-          <option value="tps">TPS &amp; Wilayah</option><option value="potensi">Potensi</option>
-          <option value="ganda">Data ganda</option>
+          <option value="tps">TPS &amp; Wilayah</option>
         </select>
         <select id="val" class="inp" onchange="infoCetak()"></select>
         <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-print mr-1"></i>Cetak</button></div>
@@ -153,22 +191,8 @@
         <select id="wKel" class="inp" onchange="fillWil('kel')" aria-label="Kelurahan"></select>
         <select id="wTps" class="inp" onchange="fillWil('tps')" aria-label="TPS"></select>
       </div>
-      <p id="cetakInfo" class="text-xs text-slate-500 mt-2"></p></div>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow p-4">
-      <button type="button" data-toggle="bodyPendata" class="w-full flex items-center justify-between text-left" onclick="toggleSeksi('bodyPendata',this)" aria-expanded="false"><span class="font-bold"><i class="fa-solid fa-users-gear text-blue-700 mr-2"></i>Kelola Pendata</span><i data-chev="bodyPendata" class="fa-solid fa-chevron-up text-slate-500 transition-transform" style="transform:rotate(180deg)"></i></button>
-      <div id="bodyPendata" class="hidden mt-3">
-      <button class="btn" onclick="formPendata()"><i class="fa-solid fa-plus mr-1"></i>Tambah Pendata</button>
-      <div class="relative my-3">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input id="cariPendata" class="inp pl-9" placeholder="Cari pendata (nama atau nomor telepon)" oninput="renderPendata()"></div>
-      <div id="wrapPendata" class="tbl-wrap"><table class="tbl tbl-t whitespace-nowrap">
-        <tbody id="pendataBody"></tbody></table></div>
-      <div id="navPendata" class="mt-2"></div>
-      </div>
-      
-    </div>
+      <p id="cetakInfo" class="text-xs text-slate-500 mt-2"></p>
+    </section>
   </main>
   <footer class="text-center text-xs text-slate-500 py-6">Powered by Anto Design Concept &copy; 2026</footer>
 </section>
@@ -225,7 +249,7 @@
 /* ================== KONFIGURASI ================== */
 const SUPABASE_URL      = 'https://xnxodvsycgtsgvofofyh.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_8SOrlhZ__osfT14ZKPmJtg_vy20APAW';
-const LOGO_URL          = 'https://res.cloudinary.com/q7sznixw/image/upload/v1791355406/Logo_SIDAK_Data_Konstituen_i9hub5.webp';
+const LOGO_URL          = 'https://res.cloudinary.com/q7sznixw/image/upload/v1794746157/Sidak_gaxahq.webp';
 const HEADER_IMG_URL    = 'https://res.cloudinary.com/q7sznixw/image/upload/v1788749592/6_vbabok.png';
 /* ================================================= */
   
@@ -239,27 +263,22 @@ let ADATA = [], UDATA = [], PROFIL = null;
 document.querySelectorAll('.js-logo').forEach(i => i.src = LOGO_URL);
 
 /* ---------- Header + jam ---------- */
-function headerHTML(withKeluar = true) {
+function headerHTML(tgl = true) {
   return `<header class="hdr relative overflow-hidden text-white">
     <img src="${HEADER_IMG_URL}" alt="" class="absolute right-0 top-0 h-full w-auto max-w-[55%] object-contain object-right opacity-90 pointer-events-none"
          style="-webkit-mask-image:linear-gradient(to left,#000 40%,transparent);mask-image:linear-gradient(to left,#000 40%,transparent)">
     <div class="relative max-w-5xl mx-auto px-6 py-4 flex flex-col items-start text-left gap-1">
       <span class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/60 backdrop-blur-sm shadow-md p-0.5"><img src="${LOGO_URL}" alt="SIDAK" class="max-w-full max-h-full object-contain"></span>
       <p class="font-bold text-sm sm:text-base leading-tight">Sistem Informasi Data Konstituen</p>
-      <p class="js-date text-xs sm:text-sm text-blue-100"></p>
-      <p class="js-time text-xl sm:text-2xl font-extrabold tabular-nums"></p>
-      ${withKeluar ? '<button onclick="keluar()" class="mt-1 text-sm text-white bg-red-600/75 hover:bg-red-600/90 rounded-full px-4 py-1.5 font-semibold"><i class="fa-solid fa-right-from-bracket mr-1"></i>Keluar</button>' : ''}
+      ${tgl ? '<p class="js-date text-xs sm:text-sm text-blue-100"></p>' : ''}
     </div></header>`;
 }
-document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML(!h.closest('#v-user')));   // Keluar di halaman User pindah ke Fitur Utama
+document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML(!!h.closest('#v-user')));   // tanggal di header hanya untuk User; di Admin tanggal + Keluar ada di badan halaman
 function tick() {
-  const n = new Date();
-  const d = n.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-  const t = n.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false }).replace(/\./g, ':');
+  const d = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   document.querySelectorAll('.js-date').forEach(e => e.textContent = d);
-  document.querySelectorAll('.js-time').forEach(e => e.textContent = t);
 }
-tick(); setInterval(tick, 1000);
+tick(); setInterval(tick, 60000);
 
 /* ---------- Navigasi ---------- */
 function show(v) { ['login','admin','user'].forEach(x => $('v-'+x).classList.toggle('hidden', x !== v)); }
@@ -493,14 +512,6 @@ function toggleEye(id, btn) {
   btn.innerHTML = `<i class="fa-regular ${tampil ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
   btn.setAttribute('aria-label', tampil ? 'Sembunyikan password' : 'Lihat password');
 }
-function toggleSeksi(id, btn) {
-  const el = $(id), ciut = !el.classList.contains('hidden');
-  el.classList.toggle('hidden', ciut);
-  const ic = document.querySelector('[data-chev="' + id + '"]');
-  if (ic) ic.style.transform = ciut ? 'rotate(180deg)' : '';
-  document.querySelectorAll('[data-toggle="' + id + '"]').forEach(b => b.setAttribute('aria-expanded', String(!ciut)));
-  requestAnimationFrame(() => ['wrapPendata'].forEach(updNav));
-}
 function waLink(hp) {
   let d = String(hp || '').replace(/\D/g, '');
   if (d.startsWith('0')) d = '62' + d.slice(1); else if (d.startsWith('8')) d = '62' + d;
@@ -580,14 +591,6 @@ function toast(t) {
 const POTC = { Tinggi:'bg-green-100 text-green-700', Sedang:'bg-amber-100 text-amber-700', Rendah:'bg-slate-200 text-slate-600' };
 
 /* ---------- ADMIN ---------- */
-const CARDS = [
-  ['masuk','Data Masuk','fa-inbox','from-blue-600 to-blue-400'],
-  ['ganda','Data Ganda','fa-clone','from-red-600 to-red-400'],
-  ['bersih','Data Bersih','fa-circle-check','from-teal-600 to-teal-400'],
-  ['tinggi','Potensi Tinggi','fa-arrow-trend-up','from-green-700 to-green-500'],
-  ['sedang','Potensi Sedang','fa-minus','from-amber-600 to-amber-400'],
-  ['rendah','Potensi Rendah','fa-arrow-trend-down','from-slate-600 to-slate-400']
-];
 // Prioritas data ganda per NIK: data diri pendata > potensi (Tinggi > Sedang > Rendah) > yang lebih dulu masuk.
 // Yang pertama = prioritas (oranye, dipertahankan); sisanya = duplikat (merah).
 const RANK = { Tinggi: 3, Sedang: 2, Rendah: 1 };
@@ -604,24 +607,12 @@ function hitungPrioritas() {
     a[0].prioritas = true; a.slice(1).forEach(d => d.merah = true);
   });
 }
-// Kartu mengikuti filter di seksi Cetak Data. Data Bersih = jumlah NIK unik (data ganda merah tidak dihitung).
-function renderCards(rows) {
-  const n = { masuk: rows.length, ganda: rows.filter(d => d.ganda).length, bersih: rows.filter(d => !d.merah).length,
-    tinggi: rows.filter(d => d.potensi === 'Tinggi').length, sedang: rows.filter(d => d.potensi === 'Sedang').length,
-    rendah: rows.filter(d => d.potensi === 'Rendah').length };
-  $('cards').innerHTML = CARDS.map(([k, lb, ic, g]) => {
-    const pct = n.masuk ? (n[k] / n.masuk * 100).toFixed(1) : '0.0';
-    return `<div class="col-span-2 md:col-span-1 bg-gradient-to-br ${g} text-white rounded-2xl p-3 md:p-4 shadow">
-      <i class="fa-solid ${ic} text-xl md:text-2xl opacity-80"></i>
-      <p class="text-2xl md:text-3xl font-extrabold mt-1 md:mt-2">${n[k]}</p>
-      <p class="text-xs md:text-sm font-semibold leading-tight">${lb}</p><p class="text-xs opacity-90">${pct}%</p></div>`;
-  }).join('');
-}
 async function loadAdmin(silent) {
   try {
     ADATA = await rpc('admin_data', { p_pass: S.pass });
     hitungPrioritas();
     if ($('lihatBody')) renderLihat();
+    renderKons(); renderSheet();
     fillVal(); loadPendata();
   } catch (e) { if (!silent) notif('Gagal memuat data: ' + e.message); }
 }
@@ -632,7 +623,7 @@ function fillVal() {
   if (tps) { fillWil('kec'); return; }
   if (!by) { sel.innerHTML = '<option value="">-</option>'; sel.disabled = true; infoCetak(); return; }
   sel.disabled = false;
-  const vals = by === 'ganda' ? ['Ganda'] : uniq(ADATA.map(d => d[by]));
+  const vals = uniq(ADATA.map(d => d[by]));
   const cur = sel.value;
   sel.innerHTML = vals.map(v => `<option>${esc(v)}</option>`).join('') || '<option value="">(kosong)</option>';
   if (vals.includes(cur)) sel.value = cur;
@@ -656,7 +647,6 @@ function fillWil(dari) {
 }
 function dataCetak() {
   const by = $('by').value;
-  if (by === 'ganda') return { rows: ADATA.filter(d => d.ganda), judul: 'Data Ganda' };
   if (by === 'tps') {
     const kec = $('wKec').value, kel = $('wKel').value, tps = $('wTps').value;
     const rows = ADATA.filter(d => (!kec || d.kecamatan === kec) && (!kel || d.kelurahan === kel) && (!tps || d.no_tps === tps));
@@ -667,10 +657,8 @@ function dataCetak() {
   return { rows: ADATA, judul: 'Semua Data' };
 }
 function infoCetak() {
-  const { rows, judul } = dataCetak();
+  const { rows } = dataCetak();
   $('cetakInfo').textContent = rows.length + ' data akan dicetak';
-  $('cardFilter').textContent = 'Jumlah di atas mengikuti filter Cetak Data: ' + judul;
-  renderCards(rows);
 }
 function cetakAdmin() {
   const { rows, judul } = dataCetak();
@@ -744,36 +732,41 @@ function lihatAdmin() {
   viewModal('Lihat Data', `<div id="lihatBody"></div>`);
   renderLihat();
 }
-function renderLihat() {
-  const lama = $('wrapLihat'), x0 = lama ? lama.scrollLeft : 0;   // pertahankan posisi geser saat data diperbarui
-  const { rows, judul } = dataCetak();
-  const urut = [...rows].sort((a, b) => {
+const BARIS_LIHAT = [
+  ['Nama', d => `<span class="font-semibold">${esc(d.nama)}</span>`],
+  ['NIK', d => esc(d.nik)],
+  ['Hubungan', d => esc(d.hubungan || (d.is_diri ? 'Data diri' : '-'))],
+  ['Potensi', d => `<span class="rounded-full text-xs font-semibold px-2.5 py-1 ${POTC[d.potensi] || ''}">${esc(d.potensi)}</span>`],
+  ['Pendata', d => esc(d.pendata_nama || '')],
+  ['Kecamatan', d => esc(d.kecamatan)],
+  ['Kelurahan', d => esc(d.kelurahan)],
+  ['TPS', d => esc(d.no_tps || '-')],
+  ['Ket.', d => d.ganda ? '<span class="rounded-full bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1">Ganda</span>' : ''],
+  ['Aksi', d => d.ganda && !d.is_diri
+    ? `<button class="ba ${d.unggul ? 'ba-o' : 'ba-r'}" onclick="hapusGanda('${d.id}')">Hapus</button>`
+    : '<span class="text-slate-400">-</span>']
+];
+function urutLihat(rows) {
+  return [...rows].sort((a, b) => {
     if (a.ganda !== b.ganda) return a.ganda ? -1 : 1;                    // data ganda di depan, dikelompokkan per NIK
     if (a.ganda) return String(a.nik).localeCompare(String(b.nik))
       || ((RANK[b.potensi] || 0) - (RANK[a.potensi] || 0)) || (new Date(a.created_at) - new Date(b.created_at));
     return String(a.nama).localeCompare(String(b.nama), 'id');
   });
+}
+// Judul di kolom kiri, setiap data satu kolom ke kanan
+function tabelLihat(urut, wid) {
+  return `<div id="${wid}" class="tbl-wrap"><table class="tbl tbl-t whitespace-nowrap"><tbody>
+    ${BARIS_LIHAT.map(([lb, f]) => `<tr><th>${lb}</th>${urut.map((d, i) => `<td>${f(d, i)}</td>`).join('')}</tr>`).join('')}
+    </tbody></table></div>
+    <div class="mt-2">${navBar(wid)}</div>`;
+}
+function renderLihat() {
+  const lama = $('wrapLihat'), x0 = lama ? lama.scrollLeft : 0;   // pertahankan posisi geser saat data diperbarui
+  const { rows, judul } = dataCetak();
   const head = `<p class="text-xs text-slate-500 mb-2">${esc(judul)} &middot; ${rows.length} data &middot; ${rows.filter(d => d.ganda).length} ganda</p>`;
   if (!rows.length) { $('lihatBody').innerHTML = head + '<p class="text-slate-500 text-sm">Tidak ada data pada filter ini.</p>'; return; }
-  // Judul di kolom kiri, setiap data satu kolom ke kanan
-  const baris = [
-    ['Nama', d => `<span class="font-semibold">${esc(d.nama)}</span>`],
-    ['NIK', d => esc(d.nik)],
-    ['Hubungan', d => esc(d.hubungan || (d.is_diri ? 'Data diri' : '-'))],
-    ['Potensi', d => `<span class="rounded-full text-xs font-semibold px-2.5 py-1 ${POTC[d.potensi] || ''}">${esc(d.potensi)}</span>`],
-    ['Pendata', d => esc(d.pendata_nama || '')],
-    ['Kecamatan', d => esc(d.kecamatan)],
-    ['Kelurahan', d => esc(d.kelurahan)],
-    ['TPS', d => esc(d.no_tps || '-')],
-    ['Ket.', d => d.ganda ? '<span class="rounded-full bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1">Ganda</span>' : ''],
-    ['Aksi', d => d.ganda && !d.is_diri
-      ? `<button class="ba ${d.unggul ? 'ba-o' : 'ba-r'}" onclick="hapusGanda('${d.id}')">Hapus</button>`
-      : '<span class="text-slate-400">-</span>']
-  ];
-  $('lihatBody').innerHTML = head + `<div id="wrapLihat" class="tbl-wrap"><table class="tbl tbl-t whitespace-nowrap"><tbody>
-    ${baris.map(([lb, f]) => `<tr><th>${lb}</th>${urut.map((d, i) => `<td>${f(d, i)}</td>`).join('')}</tr>`).join('')}
-    </tbody></table></div>
-    <div class="mt-2">${navBar('wrapLihat')}</div>`;
+  $('lihatBody').innerHTML = head + tabelLihat(urutLihat(rows), 'wrapLihat');
   pasangNav('wrapLihat'); $('wrapLihat').scrollLeft = x0;
 }
 async function hapusGanda(id) {
@@ -784,6 +777,60 @@ async function hapusGanda(id) {
   if (!ok) return;
   try { await rpc('admin_data_hapus', { p_pass: S.pass, p_id: id }); await loadAdmin(true); toast('Data berhasil dihapus'); }
   catch (e) { notif(e.message, 'Gagal menghapus data'); }
+}
+
+/* ---------- Fitur Utama (admin) ---------- */
+let AFITUR = '';
+function pilihFiturAdmin(k) {
+  AFITUR = AFITUR === k ? '' : k;
+  ['kelola', 'kons', 'cetak'].forEach(x => $('a-' + x).classList.toggle('hidden', x !== AFITUR));
+  document.querySelectorAll('#v-admin [data-fitur]').forEach(b => {
+    const on = b.dataset.fitur === AFITUR;
+    b.classList.toggle('aktif', on); b.setAttribute('aria-pressed', String(on));
+  });
+  if (AFITUR === 'kelola') requestAnimationFrame(() => updNav('wrapPendata'));
+  if (AFITUR === 'kons') renderKons();
+  if (AFITUR) $('a-' + AFITUR).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+/* ---------- Data Konstituen (admin) ---------- */
+function filterKons() {
+  const q = String($('cariKons').value || '').toLowerCase().trim(), kd = $('fKead').value, pt = $('fPot').value;
+  return ADATA.filter(d =>
+    (kd === 'semua' || (kd === 'ganda' ? d.ganda : !d.ganda)) &&
+    (pt === 'semua' || d.potensi === pt) &&
+    (!q || [d.nama, d.nik, d.hubungan || (d.is_diri ? 'Data diri' : ''), d.potensi, d.pendata_nama, d.kecamatan, d.kelurahan, d.no_tps, d.ganda ? 'Ganda' : '']
+      .some(v => String(v || '').toLowerCase().includes(q))));
+}
+function renderKons() {
+  if (!$('konsBody')) return;
+  $('cariKonsX').classList.toggle('hidden', !$('cariKons').value);
+  const lama = $('wrapKons'), x0 = lama ? lama.scrollLeft : 0;
+  const rows = filterKons();
+  const head = `<p class="text-xs text-slate-500 mb-2">${rows.length} dari ${ADATA.length} data &middot; ${rows.filter(d => d.ganda).length} ganda</p>`;
+  if (!rows.length) { $('konsBody').innerHTML = head + '<p class="text-slate-500 text-sm">Tidak ada data yang cocok.</p>'; return; }
+  $('konsBody').innerHTML = head + tabelLihat(urutLihat(rows), 'wrapKons');
+  pasangNav('wrapKons'); $('wrapKons').scrollLeft = x0;
+}
+function hapusCariKons() { $('cariKons').value = ''; renderKons(); $('cariKons').focus(); }
+
+/* ---------- Data Statistik (admin) ---------- */
+const STAT_POT = [['Tinggi', 'fa-arrow-trend-up', '#16a34a'], ['Sedang', 'fa-minus', '#d97706'], ['Rendah', 'fa-arrow-trend-down', '#64748b']];
+const persen = (n, t) => (t ? (n / t * 100).toFixed(1) : '0.0').replace('.', ',') + '%';
+function isiStatistik() {
+  if (!$('dnGanda')) return;
+  const t = ADATA.length, g = ADATA.filter(d => d.ganda).length, b = t - g, C = 2 * Math.PI * 48;
+  const lg = t ? g / t * C : 0, lb = t ? b / t * C : 0;
+  $('dnGanda').style.strokeDasharray = lg + ' ' + (C - lg); $('dnGanda').style.strokeDashoffset = 0;
+  $('dnBersih').style.strokeDasharray = lb + ' ' + (C - lb); $('dnBersih').style.strokeDashoffset = -lg;
+  $('dnTotal').textContent = t;
+  $('stGanda').textContent = g + ' (' + persen(g, t) + ')';
+  $('stBersih').textContent = b + ' (' + persen(b, t) + ')';
+  const v = STAT_POT.map(([k]) => ADATA.filter(d => d.potensi === k).length), maks = Math.max(...v, 1);
+  STAT_POT.forEach(([k], i) => {
+    $('spv-' + k).textContent = v[i] + ' (' + persen(v[i], t) + ')';
+    $('spb-' + k).style.height = Math.max(v[i] / maks * 82, 1.5) + '%';
+  });
 }
 
 /* ---------- Sinkronisasi seketika (admin) ---------- */
@@ -889,6 +936,32 @@ const SHEETS = {
       <p class="text-xs text-slate-500 mt-4">Data ganda hanya bisa dilihat. Penanganannya oleh admin.</p>`,
     init: () => setTimeout(isiJumlah, 280)   // batang tumbuh saat modal hampir selesai naik
   },
+  statistik: {
+    judul: 'Data Statistik', ikon: 'fa-chart-pie',
+    body: () => `
+      <h4 class="font-bold text-sm mb-3">Keadaan Data</h4>
+      <div class="flex items-center gap-5">
+        <div class="relative w-36 h-36 flex-none">
+          <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90" aria-hidden="true">
+            <circle cx="60" cy="60" r="48" fill="none" stroke="#e2e8f0" stroke-width="16"/>
+            <circle id="dnGanda" cx="60" cy="60" r="48" fill="none" stroke="#dc2626" stroke-width="16" style="stroke-dasharray:0 301.6;transition:stroke-dasharray .9s ease,stroke-dashoffset .9s ease"/>
+            <circle id="dnBersih" cx="60" cy="60" r="48" fill="none" stroke="#0d9488" stroke-width="16" style="stroke-dasharray:0 301.6;transition:stroke-dasharray .9s ease,stroke-dashoffset .9s ease"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="dnTotal" class="text-2xl font-extrabold">0</span><span class="text-[11px] text-slate-500">Total data</span></div>
+        </div>
+        <div class="flex-1 space-y-3 text-sm">
+          <div><p class="flex items-center gap-2 font-semibold"><span class="w-3 h-3 rounded-full" style="background:#dc2626"></span>Ganda</p><p id="stGanda" class="font-extrabold pl-5">0 (0,0%)</p></div>
+          <div><p class="flex items-center gap-2 font-semibold"><span class="w-3 h-3 rounded-full" style="background:#0d9488"></span>Bersih</p><p id="stBersih" class="font-extrabold pl-5">0 (0,0%)</p></div>
+        </div>
+      </div>
+      <h4 class="font-bold text-sm mt-7 mb-3">Data Potensial</h4>
+      <div class="chart">${STAT_POT.map(([k, , c]) =>
+        `<div class="chart-col"><span id="spv-${k}" class="text-xs font-extrabold mb-1 whitespace-nowrap">0 (0,0%)</span><div id="spb-${k}" class="bar" style="background:${c}"></div></div>`).join('')}</div>
+      <div class="flex gap-4 px-2 mt-2">${STAT_POT.map(([k, ic, c]) =>
+        `<div class="flex-1 text-center text-xs font-semibold text-slate-600"><i class="fa-solid ${ic} text-base block mb-0.5" style="color:${c}"></i>${k}</div>`).join('')}</div>
+      <p class="text-xs text-slate-500 mt-4">Persentase dihitung dari seluruh data masuk.</p>`,
+    init: () => setTimeout(isiStatistik, 280)
+  },
 };
 function openSheet(k) {
   const c = SHEETS[k]; SHEET = k;
@@ -914,6 +987,7 @@ function closeSheet() {
 function renderSheet() {
   if (SHEET === 'diri') isiDiri();
   else if (SHEET === 'jumlah') isiJumlah();
+  else if (SHEET === 'statistik') isiStatistik();
 }
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && SHEET && $('modal').classList.contains('hidden') && $('confirm').classList.contains('hidden') && !pvAktif) closeSheet();
