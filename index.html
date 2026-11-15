@@ -206,7 +206,7 @@
 <section id="v-user" class="hidden min-h-screen flex flex-col">
   <div class="js-header"></div>
   <main class="w-full max-w-3xl mx-auto flex-1 p-4 space-y-7">
-    <div class="px-2">
+    <div>
       <div class="flex items-center justify-between mb-2">
         <h2 class="font-bold"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
         <button type="button" class="w-9 h-9 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center" onclick="tanyaKeluar()" title="Keluar" aria-label="Keluar"><i class="fa-solid fa-right-from-bracket"></i></button>
@@ -219,12 +219,12 @@
       </div>
     </div>
 
-    <section id="sec-pendataan" class="hidden px-2">
+    <section id="sec-pendataan" class="hidden">
       <h2 class="font-bold mb-3"><i class="fa-solid fa-user-plus text-blue-700 mr-2"></i>Pendataan</h2>
       <div id="formPendataan" class="max-w-md"></div>
     </section>
 
-    <section id="sec-data" class="hidden px-2">
+    <section id="sec-data" class="hidden">
       <h2 class="font-bold mb-3"><i class="fa-solid fa-table-list text-blue-700 mr-2"></i>Data Konstituen</h2>
       <div class="flex gap-2">
         <div class="relative flex-1 min-w-0">
@@ -232,7 +232,7 @@
           <input id="cariData" class="inp pl-9" placeholder="Cari data (nama, NIK, kelurahan, hubungan)" oninput="renderUser()"></div>
         <button type="button" class="btn btn-b whitespace-nowrap" onclick="cetakUser()"><i class="fa-solid fa-print mr-1"></i>Cetak</button>
       </div>
-      <div class="tbl-wrap tbl-scroll mt-3 -mx-2"><table class="tbl tbl-v">
+      <div class="tbl-wrap tbl-scroll mt-3"><table class="tbl tbl-v">
         <thead><tr><th>Nama</th><th>Kel.</th><th>TPS</th><th>Aksi</th></tr></thead>
         <tbody id="dataBody"></tbody></table></div>
     </section>
@@ -268,17 +268,17 @@ let ADATA = [], UDATA = [], PROFIL = null;
 document.querySelectorAll('.js-logo').forEach(i => i.src = LOGO_URL);
 
 /* ---------- Header + jam ---------- */
-function headerHTML(tgl = true) {
+function headerHTML(tgl = true, mw = 'max-w-5xl') {
   return `<header class="hdr relative overflow-hidden text-white">
     <img src="${HEADER_IMG_URL}" alt="" class="absolute right-0 top-0 h-full w-auto max-w-[55%] object-contain object-right opacity-90 pointer-events-none"
          style="-webkit-mask-image:linear-gradient(to left,#000 40%,transparent);mask-image:linear-gradient(to left,#000 40%,transparent)">
-    <div class="relative max-w-5xl mx-auto px-6 py-4 flex flex-col items-start text-left gap-1">
+    <div class="relative ${mw} mx-auto px-4 py-4 flex flex-col items-start text-left gap-1">
       <span class="inline-flex items-center justify-center w-16 h-16"><img src="${LOGO_URL}" alt="SIDAK" class="max-w-full max-h-full object-contain"></span>
       <p class="font-bold text-sm sm:text-base leading-tight">Sistem Informasi Data Konstituen</p>
       ${tgl ? '<p class="js-date text-xs sm:text-sm text-blue-100"></p>' : ''}
     </div></header>`;
 }
-document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML(!!h.closest('#v-user')));   // tanggal di header hanya untuk User; di Admin tanggal + Keluar ada di badan halaman
+document.querySelectorAll('.js-header').forEach(h => { const u = !!h.closest('#v-user'); h.innerHTML = headerHTML(u, u ? 'max-w-3xl' : 'max-w-5xl'); });   // tanggal di header hanya untuk User; di Admin tanggal + Keluar ada di badan halaman
 function tick() {
   const d = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   document.querySelectorAll('.js-date').forEach(e => e.textContent = d);
@@ -553,6 +553,7 @@ function updNav(id) {
 function pasangNav(id) { const w = $(id); if (w) { w.addEventListener('scroll', () => updNav(id)); updNav(id); } }
 
 /* ---------- Dialog & toast buatan sendiri ---------- */
+let dlgTutup = null;   // penutup dialog konfirmasi yang sedang tampil (untuk tombol Back)
 const DLG = {
   bahaya:['bg-red-100 text-red-600','fa-trash-can','bg-red-600 hover:bg-red-700'],
   peringatan:['bg-amber-100 text-amber-600','fa-key','bg-amber-500 hover:bg-amber-600'],
@@ -571,10 +572,11 @@ function dialog({ judul, pesan, tombol, tipe, batal }) {
         ${batal ? '<button id="cn" class="flex-1 rounded-lg border border-slate-300 py-2.5 font-semibold text-slate-700 hover:bg-slate-50">Batal</button>' : ''}
         <button id="cy" class="flex-1 rounded-lg py-2.5 font-semibold text-white ${w[2]}">${esc(tombol)}</button></div></div>`;
     c.classList.remove('hidden'); c.classList.add('flex');
-    const tutup = v => { c.classList.add('hidden'); c.classList.remove('flex'); c.innerHTML = ''; document.removeEventListener('keydown', kd); res(v); };
+    const tutup = v => { c.classList.add('hidden'); c.classList.remove('flex'); c.innerHTML = ''; document.removeEventListener('keydown', kd); dlgTutup = null; res(v); };
     const kd = e => { if (e.key === 'Escape') tutup(false); };
     document.addEventListener('keydown', kd);
     c.onclick = e => { if (e.target === c) tutup(false); };
+    dlgTutup = tutup;
     $('cy').onclick = () => tutup(true);
     if (batal) $('cn').onclick = () => tutup(false);
     $('cy').focus();
@@ -1104,8 +1106,13 @@ function pasangBack() {
   window.addEventListener('popstate', () => {
     if (!S) return;
     history.pushState({ sidak: 1 }, '');   // tetap di halaman; keluar hanya setelah dikonfirmasi
-    if (pvAktif) { pvAktif(); return; }       // pratinjau PDF terbuka: Back menutupnya dulu
-    if ($('confirm').classList.contains('hidden')) tanyaKeluar();
+    // Back bekerja seperti ikon X / Batal pada lapisan teratas
+    if (dlgTutup) { dlgTutup(false); return; }                 // dialog konfirmasi: Batal
+    if (pvAktif) { pvAktif(); return; }                        // pratinjau PDF
+    const x = $('modal').classList.contains('hidden') ? null : $('modal').querySelector('[data-x], #mx');
+    if (x) { x.click(); return; }                              // modal dengan ikon X
+    if (SHEET) { closeSheet(); return; }                       // modal dari bawah
+    tanyaKeluar();                                             // tanpa modal (atau modal wajib diisi): konfirmasi keluar
   });
 }
 
