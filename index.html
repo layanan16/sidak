@@ -29,6 +29,13 @@
   .tbl th,.tbl td,.tbl th *,.tbl td *{font-size:.8rem}
   /* satu ukuran huruf untuk seluruh isi halaman utama (admin & user) */
   #v-admin main,#v-user main,#v-admin main *:not(i),#v-user main *:not(i){font-size:.8rem}
+  /* pengecualian: judul dan angka grafik kembali ke ukuran semula */
+  #v-admin main h2.font-bold,#v-user main h2.font-bold{font-size:1rem}
+  #v-admin main h4.font-bold,#v-user main h4.font-bold{font-size:.875rem}
+  #v-admin main [id^="jv-"],#v-user main [id^="jv-"]{font-size:1.25rem}
+  #v-admin main [id$="DnTotal"],#v-user main [id$="DnTotal"]{font-size:1.5rem}
+  #v-admin main [id^="spv-"],#v-user main [id^="spv-"]{font-size:.75rem}
+  #v-admin main [id$="StGanda"],#v-admin main [id$="StBersih"],#v-user main [id$="StGanda"],#v-user main [id$="StBersih"]{font-size:.875rem}
   .tbl tbody tr:hover td{background:#f8fafc}
   .ba{display:inline-block;padding:.35rem .8rem;border-radius:.5rem;font-size:.75rem;font-weight:700;color:#fff;white-space:nowrap}
   .ba+.ba{margin-left:.4rem}
@@ -137,14 +144,12 @@
 <section id="v-admin" class="hidden min-h-screen flex flex-col">
   <div class="js-header"></div>
   <main class="w-full max-w-5xl mx-auto flex-1 p-4 space-y-7">
-    <div class="flex items-center justify-between -mb-2">
-      <p class="js-date text-sm font-semibold text-slate-600"></p>
-      <button type="button" class="w-9 h-9 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center" onclick="tanyaKeluar()" title="Keluar" aria-label="Keluar"><i class="fa-solid fa-right-from-bracket"></i></button>
-    </div>
-
     <div>
-      <h2 class="font-bold mb-2"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
-      <div class="grid grid-cols-4 gap-1.5 max-w-2xl">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="font-bold"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
+        <button type="button" class="w-9 h-9 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center" onclick="tanyaKeluar()" title="Keluar" aria-label="Keluar"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+      <div class="grid grid-cols-4 gap-1.5">
         <button type="button" class="fitur" data-fitur="kelola" aria-pressed="false" onclick="pilihFiturAdmin('kelola')"><span class="fitur-ic bg-gradient-to-br from-blue-600 to-blue-400"><i class="fa-solid fa-users-gear"></i></span><span class="fitur-lb">Kelola Pendata</span></button>
         <button type="button" class="fitur" data-fitur="kons" aria-pressed="false" onclick="pilihFiturAdmin('kons')"><span class="fitur-ic bg-gradient-to-br from-indigo-600 to-indigo-400"><i class="fa-solid fa-table-list"></i></span><span class="fitur-lb">Data Konstituen</span></button>
         <button type="button" class="fitur" data-fitur="statistik" aria-pressed="false" onclick="pilihFiturAdmin('statistik')"><span class="fitur-ic bg-gradient-to-br from-amber-600 to-amber-400"><i class="fa-solid fa-chart-pie"></i></span><span class="fitur-lb">Data Statistik</span></button>
@@ -291,7 +296,7 @@ function headerHTML(tgl = true, mw = 'max-w-5xl') {
       ${tgl ? '<p class="js-date text-xs sm:text-sm text-blue-100"></p>' : ''}
     </div></header>`;
 }
-document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML(!!h.closest('#v-user')));   // tanggal di header hanya untuk User; di Admin tanggal + Keluar ada di badan halaman
+document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML());   // tanggal di header hanya untuk User; di Admin tanggal + Keluar ada di badan halaman
 function tick() {
   const d = new Date().toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   document.querySelectorAll('.js-date').forEach(e => e.textContent = d);
