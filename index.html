@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
   .hdr{background:linear-gradient(110deg,#0a2463 0%,#1d4ed8 55%,#60a5fa 100%)}
@@ -45,6 +47,25 @@
   .nav-btn{width:2.25rem;height:2.25rem;border-radius:.5rem;border:1px solid #cbd5e1;background:#fff;color:#334155}
   .nav-btn:hover:not(:disabled){background:#f1f5f9}
   .nav-btn:disabled{opacity:.4;cursor:not-allowed}
+  /* Fitur Utama (halaman User) */
+  .fitur{display:flex;flex-direction:column;align-items:center;gap:.55rem;padding:.9rem .25rem .8rem;border-radius:1rem;background:#f8fafc;border:1px solid #e2e8f0;transition:transform .15s ease,background .15s ease,box-shadow .15s ease}
+  .fitur:hover{background:#f1f5f9;box-shadow:0 4px 12px #0f172a14}
+  .fitur:active{transform:scale(.95)}
+  .fitur:focus-visible{outline:2px solid #1d4ed8;outline-offset:2px}
+  .fitur-ic{width:3.25rem;height:3.25rem;border-radius:1rem;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.4rem;box-shadow:0 4px 10px #0f172a26}
+  .fitur-lb{font-size:.75rem;font-weight:700;color:#334155;text-align:center;line-height:1.2}
+  /* Modal dari bawah (bottom sheet) */
+  .sheet{position:fixed;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;visibility:hidden;transition:visibility 0s linear .5s}
+  .sheet.open{visibility:visible;transition-delay:0s}
+  .sheet-bg{position:absolute;inset:0;background:rgba(15,23,42,.5);opacity:0;transition:opacity .4s ease}
+  .sheet.open .sheet-bg{opacity:1}
+  .sheet-box{position:relative;width:100%;max-width:48rem;max-height:90vh;max-height:90dvh;background:#fff;border-radius:1.5rem 1.5rem 0 0;box-shadow:0 -12px 40px #0f172a40;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .5s cubic-bezier(.22,1,.36,1)}
+  .sheet.open .sheet-box{transform:translateY(0)}
+  @media (prefers-reduced-motion:reduce){.sheet,.sheet-bg,.sheet-box,.bar{transition-duration:.01s!important}}
+  /* Grafik batang Jumlah Data */
+  .chart{height:12rem;display:flex;align-items:stretch;gap:1rem;border-bottom:2px solid #cbd5e1;padding:0 .5rem}
+  .chart-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .bar{width:100%;max-width:4.5rem;border-radius:.6rem .6rem 0 0;height:0;transition:height .9s cubic-bezier(.22,1,.36,1)}
 </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -132,39 +153,24 @@
   <div class="js-header"></div>
   <main class="w-full max-w-3xl mx-auto flex-1 p-4 space-y-5">
     <div class="bg-white rounded-2xl shadow p-4">
-      <div class="flex items-center gap-2">
-        <button type="button" data-toggle="bodyDiri" class="flex-1 text-left font-bold" onclick="toggleSeksi('bodyDiri',this)" aria-expanded="false"><i class="fa-solid fa-id-card text-blue-700 mr-2"></i>Data Diri</button>
-        <button class="text-sm text-blue-700 font-semibold" onclick="ubahDiri()">Ubah</button>
-        <button type="button" data-toggle="bodyDiri" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-500" onclick="toggleSeksi('bodyDiri',this)" aria-expanded="false" aria-label="Ciutkan atau buka Data Diri"><i data-chev="bodyDiri" class="fa-solid fa-chevron-up transition-transform" style="transform:rotate(180deg)"></i></button>
-      </div>
-      <div id="bodyDiri" class="hidden mt-3"><dl id="diri" class="grid grid-cols-3 gap-y-2 text-sm"></dl></div>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow p-4">
-      <button type="button" data-toggle="bodyJumlah" class="w-full flex items-center justify-between text-left" onclick="toggleSeksi('bodyJumlah',this)" aria-expanded="false"><span class="font-bold"><i class="fa-solid fa-chart-simple text-blue-700 mr-2"></i>Jumlah Data</span><i data-chev="bodyJumlah" class="fa-solid fa-chevron-up text-slate-500 transition-transform" style="transform:rotate(180deg)"></i></button>
-      <div id="bodyJumlah" class="hidden mt-3">
-      <div id="sum" class="grid grid-cols-3 gap-3 text-center"></div>
-      <p class="text-xs text-slate-500 mt-2">Data ganda hanya bisa dilihat. Penanganannya oleh admin.</p>
+      <h2 class="font-bold mb-4"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
+      <div class="grid grid-cols-6 sm:grid-cols-5 gap-3">
+        <button type="button" class="fitur col-span-2 sm:col-span-1" onclick="openSheet('diri')"><span class="fitur-ic bg-gradient-to-br from-blue-600 to-blue-400"><i class="fa-solid fa-id-card"></i></span><span class="fitur-lb">Data Diri</span></button>
+        <button type="button" class="fitur col-span-2 sm:col-span-1" onclick="openSheet('jumlah')"><span class="fitur-ic bg-gradient-to-br from-amber-600 to-amber-400"><i class="fa-solid fa-chart-simple"></i></span><span class="fitur-lb">Jumlah Data</span></button>
+        <button type="button" class="fitur col-span-2 sm:col-span-1" onclick="formData()"><span class="fitur-ic bg-gradient-to-br from-green-700 to-green-500"><i class="fa-solid fa-user-plus"></i></span><span class="fitur-lb">Pendataan</span></button>
+        <button type="button" class="fitur col-span-2 col-start-2 sm:col-span-1 sm:col-start-auto" onclick="openSheet('data')"><span class="fitur-ic bg-gradient-to-br from-indigo-600 to-indigo-400"><i class="fa-solid fa-table-list"></i></span><span class="fitur-lb">Data Konstituen</span></button>
+        <button type="button" class="fitur col-span-2 sm:col-span-1" onclick="keluar()"><span class="fitur-ic bg-gradient-to-br from-red-600 to-red-400"><i class="fa-solid fa-right-from-bracket"></i></span><span class="fitur-lb">Keluar</span></button>
       </div>
     </div>
-
-    <div class="bg-white rounded-2xl shadow p-4">
-      <h2 class="font-bold mb-3"><i class="fa-solid fa-user-plus text-blue-700 mr-2"></i>Pendataan</h2>
-      <button class="btn w-full" onclick="formData()">Tambah data konstituen</button>
-      <div class="relative mt-3">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-        <input id="cariData" class="inp pl-9" placeholder="Cari data (nama, NIK, kelurahan, hubungan)" oninput="renderUser()"></div>
-      <div id="wrapData" class="tbl-wrap mt-3"><table class="tbl tbl-t whitespace-nowrap">
-        <tbody id="dataBody"></tbody></table></div>
-      <div class="flex items-center justify-between mt-2">
-        <button type="button" class="nav-btn" style="color:#1d4ed8" onclick="cetakUser()" title="Cetak data" aria-label="Cetak data"><i class="fa-solid fa-print"></i></button>
-        <div id="navData"></div>
-      </div>
-    </div>
-
   </main>
   <footer class="text-center text-xs text-slate-500 py-6">Powered by Anto Design Concept &copy; 2026</footer>
 </section>
+
+<!-- Modal dari bawah (halaman User) -->
+<div id="sheet" class="sheet" aria-hidden="true">
+  <div class="sheet-bg" onclick="closeSheet()"></div>
+  <div id="sheetBox" class="sheet-box" role="dialog" aria-modal="true"></div>
+</div>
 
 <!-- MODAL -->
 <div id="modal" class="hidden fixed inset-0 z-40 bg-black/50 items-center justify-center p-4"></div>
@@ -188,7 +194,7 @@ let ADATA = [], UDATA = [], PROFIL = null;
 document.querySelectorAll('.js-logo').forEach(i => i.src = LOGO_URL);
 
 /* ---------- Header + jam ---------- */
-function headerHTML() {
+function headerHTML(withKeluar = true) {
   return `<header class="hdr relative overflow-hidden text-white">
     <img src="${HEADER_IMG_URL}" alt="" class="absolute right-0 top-0 h-full w-auto max-w-[55%] object-contain object-right opacity-90 pointer-events-none"
          style="-webkit-mask-image:linear-gradient(to left,#000 40%,transparent);mask-image:linear-gradient(to left,#000 40%,transparent)">
@@ -197,10 +203,10 @@ function headerHTML() {
       <p class="font-bold text-sm sm:text-base leading-tight">Sistem Informasi Data Konstituen</p>
       <p class="js-date text-xs sm:text-sm text-blue-100"></p>
       <p class="js-time text-xl sm:text-2xl font-extrabold tabular-nums"></p>
-      <button onclick="keluar()" class="mt-1 text-sm text-white bg-red-600/75 hover:bg-red-600/90 rounded-full px-4 py-1.5 font-semibold"><i class="fa-solid fa-right-from-bracket mr-1"></i>Keluar</button>
+      ${withKeluar ? '<button onclick="keluar()" class="mt-1 text-sm text-white bg-red-600/75 hover:bg-red-600/90 rounded-full px-4 py-1.5 font-semibold"><i class="fa-solid fa-right-from-bracket mr-1"></i>Keluar</button>' : ''}
     </div></header>`;
 }
-document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML());
+document.querySelectorAll('.js-header').forEach(h => h.innerHTML = headerHTML(!h.closest('#v-user')));   // Keluar di halaman User pindah ke Fitur Utama
 function tick() {
   const n = new Date();
   const d = n.toLocaleDateString('id-ID', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
@@ -440,12 +446,13 @@ function updNav(id) {
   });
 }
 function pasangNav(id) { const w = $(id); if (w) { w.addEventListener('scroll', () => updNav(id)); updNav(id); } }
-[['Pendata', 'pendataBody'], ['Data', 'dataBody']].forEach(([n, body]) => {
+[['Pendata', 'pendataBody']].forEach(([n, body]) => {
   $('nav' + n).innerHTML = navBar('wrap' + n);
   pasangNav('wrap' + n);
   new MutationObserver(() => updNav('wrap' + n)).observe($(body), { childList: true });
   window.addEventListener('resize', () => updNav('wrap' + n));
 });
+window.addEventListener('resize', () => updNav('wrapData'));   // tabel Data Konstituen (ada di dalam modal)
 
 /* ---------- Dialog & toast buatan sendiri ---------- */
 const DLG = {
@@ -759,28 +766,112 @@ function cetakPendata(id) {
 
 /* ---------- USER ---------- */
 const ua = () => ({ p_hp: S.hp, p_pass: S.pass });
+let SUM = null, SHEET = '';
 async function loadUser(silent) {
   try {
     PROFIL = await rpc('user_profil', ua());
-    const p = PROFIL, jk = p.jenis_kelamin === 'L' ? 'Laki-laki' : p.jenis_kelamin === 'P' ? 'Perempuan' : '-';
-    $('diri').innerHTML = [['Nama',p.nama],['NIK',p.nik],['Jenis kelamin',jk],['No. HP',p.no_hp],['Alamat',p.alamat],
-      ['Kelurahan',p.kelurahan],['Kecamatan',p.kecamatan],['No. TPS',p.no_tps]]
-      .map(([k, v]) => `<dt class="text-slate-500">${k}</dt><dd class="col-span-2 font-semibold">${esc(v || '-')}</dd>`).join('');
-    if (!p.nik && $('modal').classList.contains('hidden')) ubahDiri(false);
-    const s = await rpc('user_ringkasan', ua());
-    $('sum').innerHTML = [['Laki-laki',s.laki,'fa-mars','text-blue-700'],['Perempuan',s.perempuan,'fa-venus','text-pink-600'],['Data ganda',s.ganda,'fa-clone','text-red-600']]
-      .map(([k, n, ic, c]) => `<div class="rounded-xl bg-slate-50 p-3"><i class="fa-solid ${ic} ${c} text-xl"></i><p class="text-2xl font-extrabold">${n}</p><p class="text-xs text-slate-500">${k}</p></div>`).join('');
+    if (!PROFIL.nik && $('modal').classList.contains('hidden')) ubahDiri(false);
+    SUM = await rpc('user_ringkasan', ua());
     UDATA = await rpc('user_data', ua());
-    renderUser();
+    renderSheet();   // perbarui isi modal yang sedang terbuka (bila ada)
   } catch (e) {
     // Pembaruan otomatis: gangguan jaringan diabaikan; hanya sesi yang benar-benar ditolak server yang keluar
     if (silent && !String(e.message || '').includes('Akses ditolak')) return;
     notif('Sesi tidak valid atau sudah berakhir. Silakan masuk kembali.', 'Sesi berakhir').then(keluar);
   }
 }
+
+/* Modal dari bawah: Data Diri, Jumlah Data, Data Konstituen */
+const JUMLAH = [['laki', 'Laki-laki', 'fa-mars', '#1d4ed8'], ['perempuan', 'Perempuan', 'fa-venus', '#db2777'], ['ganda', 'Data ganda', 'fa-clone', '#dc2626']];
+const SHEETS = {
+  diri: {
+    judul: 'Data Diri', ikon: 'fa-id-card',
+    body: () => '<dl id="diri" class="grid grid-cols-3 gap-y-3 text-sm"></dl>',
+    foot: '<button type="button" class="btn btn-b w-full" onclick="ubahDiri()"><i class="fa-solid fa-pen-to-square mr-2"></i>Ubah</button>',
+    init: () => isiDiri()
+  },
+  jumlah: {
+    judul: 'Jumlah Data', ikon: 'fa-chart-simple',
+    body: () => `<div id="chartJumlah" class="chart">${JUMLAH.map(([k, , , c]) =>
+        `<div class="chart-col"><span id="jv-${k}" class="text-xl font-extrabold mb-1">0</span><div id="jb-${k}" class="bar" style="background:${c}"></div></div>`).join('')}</div>
+      <div class="flex gap-4 px-2 mt-2">${JUMLAH.map(([, lb, ic, c]) =>
+        `<div class="flex-1 text-center text-xs font-semibold text-slate-600"><i class="fa-solid ${ic} text-base block mb-0.5" style="color:${c}"></i>${lb}</div>`).join('')}</div>
+      <p class="text-xs text-slate-500 mt-4">Data ganda hanya bisa dilihat. Penanganannya oleh admin.</p>`,
+    init: () => setTimeout(isiJumlah, 280)   // batang tumbuh saat modal hampir selesai naik
+  },
+  data: {
+    judul: 'Data Konstituen', ikon: 'fa-table-list',
+    body: () => `<div class="flex gap-2">
+        <div class="relative flex-1 min-w-0">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input id="cariData" class="inp pl-9" placeholder="Cari data (nama, NIK, kelurahan, hubungan)" oninput="renderUser()"></div>
+        <button type="button" class="btn btn-b whitespace-nowrap" onclick="cetakUser()"><i class="fa-solid fa-print mr-1"></i>Cetak</button>
+      </div>
+      <div id="wrapData" class="tbl-wrap mt-3"><table class="tbl tbl-t whitespace-nowrap"><tbody id="dataBody"></tbody></table></div>
+      <div id="navData" class="mt-2"></div>`,
+    init: () => {
+      $('navData').innerHTML = navBar('wrapData');
+      pasangNav('wrapData');
+      new MutationObserver(() => updNav('wrapData')).observe($('dataBody'), { childList: true });
+      renderUser();
+    }
+  }
+};
+function openSheet(k) {
+  const c = SHEETS[k]; SHEET = k;
+  $('sheetBox').innerHTML = `<div class="pt-2.5 pb-1 flex justify-center"><span class="block w-10 h-1.5 rounded-full bg-slate-300"></span></div>
+    <div class="flex items-center justify-between px-5 pt-1 pb-3 border-b border-slate-100">
+      <h3 class="font-bold text-lg"><i class="fa-solid ${c.ikon} text-blue-700 mr-2"></i>${c.judul}</h3>
+      <button type="button" class="w-9 h-9 rounded-full hover:bg-slate-100 text-slate-500 text-2xl leading-none" onclick="closeSheet()" aria-label="Tutup">&times;</button></div>
+    <div class="flex-1 min-h-0 overflow-y-auto px-5 py-4">${c.body()}</div>
+    ${c.foot ? `<div class="px-5 py-4 border-t border-slate-100">${c.foot}</div>` : ''}`;
+  $('sheetBox').setAttribute('aria-label', c.judul);
+  c.init();
+  document.body.style.overflow = 'hidden';
+  $('sheet').setAttribute('aria-hidden', 'false');
+  void $('sheetBox').offsetHeight;   // pastikan posisi awal (di bawah layar) terbaca sebelum animasi naik
+  $('sheet').classList.add('open');
+}
+function closeSheet() {
+  SHEET = '';
+  $('sheet').classList.remove('open');
+  $('sheet').setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+function renderSheet() {
+  if (SHEET === 'diri') isiDiri();
+  else if (SHEET === 'jumlah') isiJumlah();
+  else if (SHEET === 'data') renderUser();
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && SHEET && $('modal').classList.contains('hidden') && $('confirm').classList.contains('hidden')) closeSheet();
+});
+function isiDiri() {
+  const el = $('diri'); if (!el) return;
+  const p = PROFIL;
+  if (!p) { el.innerHTML = '<p class="col-span-3 text-slate-500">Memuat data...</p>'; return; }
+  const jk = p.jenis_kelamin === 'L' ? 'Laki-laki' : p.jenis_kelamin === 'P' ? 'Perempuan' : '-';
+  el.innerHTML = [['Nama',p.nama],['NIK',p.nik],['Jenis kelamin',jk],['No. HP',p.no_hp],['Alamat',p.alamat],
+    ['Kelurahan',p.kelurahan],['Kecamatan',p.kecamatan],['No. TPS',p.no_tps]]
+    .map(([k, v]) => `<dt class="text-slate-500">${k}</dt><dd class="col-span-2 font-semibold">${esc(v || '-')}</dd>`).join('');
+}
+// Mengisi nilai batang; dipanggil ulang saat data diperbarui sehingga batang bergeser mulus tanpa diulang dari nol
+function isiJumlah() {
+  if (!$('chartJumlah')) return;
+  const s = SUM || {}, v = JUMLAH.map(([k]) => Number(s[k]) || 0), maks = Math.max(...v, 1);
+  JUMLAH.forEach(([k], i) => {
+    $('jv-' + k).textContent = v[i];
+    $('jb-' + k).style.height = Math.max(v[i] / maks * 82, 1.5) + '%';   // sisakan ruang di atas batang untuk angkanya
+  });
+}
+
+function filterUser() {
+  const q = String((($('cariData') || {}).value) || '').toLowerCase().trim();
+  return UDATA.filter(d => !q || [d.nama, d.nik, d.kelurahan, d.kecamatan, d.hubungan, d.no_tps].some(v => String(v || '').toLowerCase().includes(q)));
+}
 function renderUser() {
-  const q = ($('cariData').value || '').toLowerCase().trim();
-  const list = UDATA.filter(d => !q || [d.nama, d.nik, d.kelurahan, d.kecamatan, d.hubungan, d.no_tps].some(v => (v || '').toLowerCase().includes(q)));
+  if (!$('dataBody')) return;
+  const q = String($('cariData').value || '').trim(), list = filterUser();
   // Judul di kolom kiri, setiap data konstituen satu kolom ke kanan
   const baris = [
     ['No', (d, i) => i + 1],
@@ -794,7 +885,7 @@ function renderUser() {
   ];
   $('dataBody').innerHTML = list.length
     ? baris.map(([lb, f]) => `<tr><th>${lb}</th>${list.map((d, i) => `<td>${f(d, i)}</td>`).join('')}</tr>`).join('')
-    : `<tr><td class="text-slate-500">${q ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data. Tekan tombol di atas untuk mulai mendata.'}</td></tr>`;
+    : `<tr><td class="text-slate-500">${q ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data. Gunakan fitur Pendataan untuk mulai mendata.'}</td></tr>`;
 }
 function ubahDiri(closable = true) {
   openForm({
@@ -813,7 +904,61 @@ function formData(i) {
     onSave: async o => { await rpc('user_simpan_data', { ...ua(), p_id: d ? d.id : null, p: o }); loadUser(); }
   });
 }
-function cetakUser() { printRows('Data Pendataan - ' + (PROFIL.nama || PROFIL.no_hp), UDATA, false); }
+
+/* Cetak Data Konstituen -> dokumen PDF, lalu pilih Unduh atau Batal */
+function cetakUser() {
+  const J = window.jspdf && window.jspdf.jsPDF;
+  const gagal = () => notif('Pustaka PDF belum termuat. Periksa koneksi internet, lalu muat ulang halaman.', 'PDF belum siap');
+  if (!J) return gagal();
+  const doc = new J({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  if (typeof doc.autoTable !== 'function') return gagal();
+  const rows = filterUser(), q = String((($('cariData') || {}).value) || '').trim(), pf = PROFIL || {};
+  const judul = 'Data Pendataan - ' + (pf.nama || pf.no_hp || '');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(20); doc.text(judul, 15, 15);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90);
+  doc.text('SIDAK - Dicetak ' + new Date().toLocaleString('id-ID') + ' - Total ' + rows.length + ' data', 15, 20.5);
+  const body = rows.length
+    ? rows.map((d, i) => [i + 1, d.nama || '', d.jenis_kelamin || '', d.no_hp || '', d.kecamatan || '', d.kelurahan || '', d.no_tps || '',
+        d.hubungan || (d.is_diri ? 'Data diri' : '-'), d.ganda ? 'Ganda' : ''])
+    : [[{ content: 'Tidak ada data', colSpan: 9, styles: { halign: 'center' } }]];
+  doc.autoTable({
+    startY: 24, margin: { left: 15, right: 10, bottom: 14 }, theme: 'grid',
+    head: [['No', 'Nama', 'JK', 'No. HP', 'Kecamatan', 'Kelurahan', 'TPS', 'Hubungan', 'Ket.']], body,
+    styles: { font: 'helvetica', fontSize: 8.5, cellPadding: 1.8, lineColor: [68, 68, 68], lineWidth: 0.1, textColor: 20 },
+    headStyles: { fillColor: [229, 231, 235], textColor: 20, fontStyle: 'bold' },
+    columnStyles: { 0: { cellWidth: 10 } }
+  });
+  const n = doc.getNumberOfPages();
+  for (let i = 1; i <= n; i++) {
+    doc.setPage(i); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(120);
+    doc.text('Halaman ' + i + ' dari ' + n, 287, 205, { align: 'right' });
+  }
+  const slug = String(pf.nama || pf.no_hp || 'user').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'user';
+  dialogPdf({ blob: doc.output('blob'), nama: 'Data-Konstituen-' + slug + '-' + new Date().toISOString().slice(0, 10) + '.pdf',
+    jumlah: rows.length, halaman: n, filter: q });
+}
+function dialogPdf({ blob, nama, jumlah, halaman, filter }) {
+  const url = URL.createObjectURL(blob), c = $('confirm');
+  const kb = blob.size / 1024, ukuran = kb >= 1024 ? (kb / 1024).toFixed(1) + ' MB' : Math.max(1, Math.round(kb)) + ' KB';
+  c.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+    <div class="mx-auto w-14 h-14 rounded-full flex items-center justify-center text-2xl bg-red-100 text-red-600"><i class="fa-solid fa-file-pdf"></i></div>
+    <h3 class="font-bold text-lg mt-4">Dokumen PDF siap diunduh</h3>
+    <p class="text-sm font-semibold text-slate-700 mt-1 break-all">${esc(nama)}</p>
+    <p class="text-xs text-slate-500 mt-1">${jumlah} data &middot; ${halaman} halaman &middot; ${ukuran}</p>
+    ${filter ? `<p class="text-xs text-amber-700 mt-1">Hanya hasil pencarian &ldquo;${esc(filter)}&rdquo;</p>` : ''}
+    <a href="${url}" target="_blank" rel="noopener" class="inline-block mt-3 text-sm font-semibold text-blue-700 hover:underline"><i class="fa-regular fa-eye mr-1"></i>Lihat pratinjau</a>
+    <div class="flex gap-2 mt-5">
+      <button id="pn" type="button" class="flex-1 rounded-lg border border-slate-300 py-2.5 font-semibold text-slate-700 hover:bg-slate-50">Batal</button>
+      <a id="py" href="${url}" download="${esc(nama)}" class="flex-1 rounded-lg py-2.5 font-semibold text-white bg-blue-600 hover:bg-blue-700"><i class="fa-solid fa-download mr-1"></i>Unduh</a></div></div>`;
+  c.classList.remove('hidden'); c.classList.add('flex');
+  const tutup = () => { c.classList.add('hidden'); c.classList.remove('flex'); c.innerHTML = ''; document.removeEventListener('keydown', kd); setTimeout(() => URL.revokeObjectURL(url), 60000); };
+  const kd = e => { if (e.key === 'Escape') tutup(); };
+  document.addEventListener('keydown', kd);
+  c.onclick = e => { if (e.target === c) tutup(); };
+  $('pn').onclick = tutup;
+  $('py').onclick = () => setTimeout(() => { tutup(); toast('PDF diunduh'); }, 300);   // tunda agar unduhan sempat dimulai
+  $('py').focus();
+}
 
 /* ---------- Cetak ---------- */
 function printRows(title, rows, withPendata) {
