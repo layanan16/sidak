@@ -16,6 +16,7 @@
   .inp{width:100%;border:1px solid #cbd5e1;border-radius:.6rem;padding:.6rem .8rem;outline:none;background:#fff}
   .inp:focus{border-color:#1d4ed8;box-shadow:0 0 0 3px #1d4ed833}
   .inp:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed}
+  #cariKons::placeholder,#cariPendata::placeholder,#cariData::placeholder{font-size:.8rem}
   .btn{background:#15803d;color:#fff;font-weight:700;border-radius:.6rem;padding:.65rem 1rem}
   .btn:hover{background:#166534} .btn:disabled{opacity:.6}
   .btn-b{background:#1d4ed8} .btn-b:hover{background:#1e40af}
@@ -288,7 +289,7 @@ tick(); setInterval(tick, 60000);
 function show(v) { ['login','admin','user'].forEach(x => $('v-'+x).classList.toggle('hidden', x !== v)); }
 function start(sess) {
   S = sess; sessionStorage.setItem('sidak', JSON.stringify(S));
-  if (S.role === 'admin') { show('admin'); loadAdmin(); subscribeAdmin(); } else { show('user'); loadUser(); subscribeUser(); pasangBack(); }
+  if (S.role === 'admin') { show('admin'); loadAdmin(); subscribeAdmin(); pasangBack(); } else { show('user'); loadUser(); subscribeUser(); pasangBack(); }
 }
 function keluar() { sessionStorage.removeItem('sidak'); S = null; location.reload(); }
 
@@ -1120,7 +1121,7 @@ function pasangBack() {
   if (backTerpasang) return; backTerpasang = true;
   history.pushState({ sidak: 1 }, '');
   window.addEventListener('popstate', () => {
-    if (!S || S.role !== 'user') return;
+    if (!S) return;
     history.pushState({ sidak: 1 }, '');   // tetap di halaman; keluar hanya setelah dikonfirmasi
     if (pvAktif) { pvAktif(); return; }       // pratinjau PDF terbuka: Back menutupnya dulu
     if ($('confirm').classList.contains('hidden')) tanyaKeluar();
