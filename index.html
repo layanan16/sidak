@@ -15,14 +15,17 @@
   .hdr{background:linear-gradient(110deg,#0a2463 0%,#1d4ed8 55%,#60a5fa 100%)}
   .inp{width:100%;border:1px solid #cbd5e1;border-radius:.6rem;padding:.6rem .8rem;outline:none;background:#fff}
   .inp:focus{border-color:#1d4ed8;box-shadow:0 0 0 3px #1d4ed833}
+  .inp:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed}
   .btn{background:#15803d;color:#fff;font-weight:700;border-radius:.6rem;padding:.65rem 1rem}
   .btn:hover{background:#166534} .btn:disabled{opacity:.6}
   .btn-b{background:#1d4ed8} .btn-b:hover{background:#1e40af}
-  .tbl-wrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:.75rem}
-  .tbl{width:100%;font-size:.875rem;border-collapse:separate;border-spacing:0}
+  .tbl-wrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:.75rem;background:#fff}
+  .tbl{width:100%;font-size:.8rem;border-collapse:separate;border-spacing:0}
   .tbl th{background:#f1f5f9;color:#475569;font-weight:700;text-align:left;padding:.7rem 1rem;white-space:nowrap;border-bottom:1px solid #e2e8f0}
   .tbl td{padding:.75rem 1rem;border-bottom:1px solid #f1f5f9;vertical-align:middle}
   .tbl tbody tr:last-child td{border-bottom:0}
+  /* ukuran huruf seragam untuk seluruh isi tabel */
+  .tbl th,.tbl td,.tbl th *,.tbl td *{font-size:.8rem}
   .tbl tbody tr:hover td{background:#f8fafc}
   .ba{display:inline-block;padding:.35rem .8rem;border-radius:.5rem;font-size:.75rem;font-weight:700;color:#fff;white-space:nowrap}
   .ba+.ba{margin-left:.4rem}
@@ -178,14 +181,14 @@
 
     <!-- Cetak Data (Unduh Data) -->
     <section id="a-cetak" class="hidden bg-white rounded-2xl shadow p-4">
-      <h2 class="font-bold mb-3"><i class="fa-solid fa-print text-blue-700 mr-2"></i>Cetak Data</h2>
+      <h2 class="font-bold mb-3"><i class="fa-solid fa-download text-blue-700 mr-2"></i>Unduh Data</h2>
       <div class="grid sm:grid-cols-3 gap-2">
         <select id="by" class="inp" onchange="fillVal()">
           <option value="">Semua data</option><option value="pendata_nama">Pendata</option>
           <option value="tps">TPS &amp; Wilayah</option>
         </select>
         <select id="val" class="inp" onchange="infoCetak()"></select>
-        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-print mr-1"></i>Cetak</button></div>
+        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-file-pdf mr-1"></i>Lihat pdf</button></div>
       </div>
       <div id="wil" class="hidden grid sm:grid-cols-3 gap-2 mt-2">
         <select id="wKec" class="inp" onchange="fillWil('kec')" aria-label="Kecamatan"></select>
@@ -633,11 +636,15 @@ function fillWil(dari) {
   const kec = $('wKec').value;
   if (dari === 'kec' || dari === 'kel') {
     isi($('wKel'), opt(uniq(ADATA.filter(d => !kec || d.kecamatan === kec).map(d => d.kelurahan)), 'Semua kelurahan'));
+    if (!kec) $('wKel').value = '';
   }
   if (dari !== 'tps') {
     const kel = $('wKel').value;
     isi($('wTps'), opt(uniq(ADATA.filter(d => (!kec || d.kecamatan === kec) && (!kel || d.kelurahan === kel)).map(d => d.no_tps)), 'Semua TPS'));
+    if (!kel) $('wTps').value = '';
   }
+  $('wKel').disabled = !kec;                 // Kelurahan aktif setelah Kecamatan dipilih
+  $('wTps').disabled = !$('wKel').value;     // TPS aktif setelah Kelurahan dipilih
   infoCetak();
 }
 function dataCetak() {
@@ -667,8 +674,8 @@ function renderPendata() {
   const q = ($('cariPendata').value || '').toLowerCase().trim();
   const list = PEND.filter(p => !q || (p.nama || '').toLowerCase().includes(q) || (p.no_hp || '').includes(q));
   const badge = p => p.sudah_registrasi
-    ? '<span class="rounded-full bg-green-100 text-green-700 text-[11px] font-semibold px-2 py-1">Aktif</span>'
-    : '<span class="rounded-full bg-amber-100 text-amber-700 text-[11px] font-semibold px-2 py-1">Belum registrasi</span>';
+    ? '<span role="img" aria-label="Aktif" title="Aktif">✅</span>'
+    : '<span role="img" aria-label="Belum registrasi" title="Belum registrasi">❌</span>';
   $('pendataBody').innerHTML = list.length
     ? list.map(p => `<tr class="cursor-pointer" tabindex="0" role="button" onclick="bukaPendata('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bukaPendata('${p.id}')}">
         <td class="font-semibold">${esc(p.nama || '-')}</td>
@@ -752,7 +759,7 @@ function renderLihat() {
   const { rows, judul } = dataCetak();
   const head = `<p class="text-xs text-slate-500 mb-2">${esc(judul)} &middot; ${rows.length} data &middot; ${rows.filter(d => d.ganda).length} ganda</p>`;
   if (!rows.length) { $('lihatBody').innerHTML = head + '<p class="text-slate-500 text-sm">Tidak ada data pada filter ini.</p>'; return; }
-  $('lihatBody').innerHTML = head + tabelLihat(urutLihat(rows), 'wrapLihat');
+  $('lihatBody').innerHTML = head + tabelLihat(urutLihat(rows), 'wrapLihat', BARIS_KONS);
   pasangNav('wrapLihat'); $('wrapLihat').scrollLeft = x0;
 }
 async function hapusGanda(id) {
