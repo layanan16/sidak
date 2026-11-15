@@ -1035,24 +1035,16 @@ function filterUser() {
   const q = String((($('cariData') || {}).value) || '').toLowerCase().trim();
   return UDATA.filter(d => !q || [d.nama, d.nik, d.kelurahan, d.kecamatan, d.hubungan, d.no_tps].some(v => String(v || '').toLowerCase().includes(q)));
 }
-// NIK tersamar (asterisk) secara bawaan; ikon mata menampilkan/menyembunyikan per data
-const NIKBUKA = new Set();
-function toggleNik(id) { NIKBUKA.has(id) ? NIKBUKA.delete(id) : NIKBUKA.add(id); renderUser(); }
+// NIK tidak ditampilkan di tabel, tetapi tetap ada di data untuk mendeteksi data ganda (kolom d.ganda dari database)
 function renderUser() {
   if (!$('dataBody')) return;
   const q = String($('cariData').value || '').trim(), list = filterUser();
   $('dataBody').innerHTML = list.length
-    ? list.map(d => {
-        const id = String(d.id), nik = String(d.nik || ''), buka = NIKBUKA.has(id);
-        return `<tr>
-          <td><div class="font-semibold">${esc(d.nama)}${d.ganda ? ' <span class="ml-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5">Ganda</span>' : ''}</div>
-            <div class="mt-0.5 flex items-center gap-0.5 text-[11px] text-slate-500">
-              <span class="tabular-nums">${buka ? esc(nik) : '*'.repeat(nik.length || 16)}</span>
-              <button type="button" class="w-6 h-6 rounded-full hover:bg-slate-100 text-slate-500" onclick="toggleNik('${esc(id)}')" aria-pressed="${buka}" aria-label="${buka ? 'Sembunyikan NIK' : 'Lihat NIK'}"><i class="fa-regular ${buka ? 'fa-eye-slash' : 'fa-eye'}"></i></button></div></td>
+    ? list.map(d => `<tr>
+          <td><div class="font-semibold">${esc(d.nama)}${d.ganda ? ' <span class="ml-1 rounded-full bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5">Ganda</span>' : ''}</div></td>
           <td>${esc(d.kelurahan)}</td>
           <td>${esc(d.no_tps || '-')}</td>
-          <td><button class="ba ba-b" onclick="formData(${UDATA.indexOf(d)})">Ubah</button></td></tr>`;
-      }).join('')
+          <td><button type="button" class="w-8 h-8 rounded-lg bg-blue-600/30 text-blue-800 hover:bg-blue-600/40 flex items-center justify-center" onclick="formData(${UDATA.indexOf(d)})" title="Ubah data" aria-label="Ubah data"><i class="fa-solid fa-pen-to-square"></i></button></td></tr>`).join('')
     : `<tr><td colspan="4" class="text-slate-500">${q ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data. Gunakan fitur Pendataan untuk mulai mendata.'}</td></tr>`;
 }
 function ubahDiri(closable = true) {
