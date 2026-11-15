@@ -86,7 +86,7 @@
   .tbl-v{font-size:.8rem}
   .tbl-v th,.tbl-v td{padding:.55rem .45rem}
   .tbl-v thead th{position:sticky;top:0;z-index:1}
-  @media (min-width:768px){#v-admin .tbl-v th,#v-admin .tbl-v td{padding:.7rem 1rem}}
+  @media (min-width:768px){#v-admin .tbl-v th,#v-admin .tbl-v td,#v-user .tbl-v th,#v-user .tbl-v td{padding:.7rem 1rem}#v-user .tbl-scroll{max-height:none}}
   .nav-btn{width:2.25rem;height:2.25rem;border-radius:.5rem;border:1px solid #cbd5e1;background:#fff;color:#334155}
   .nav-btn:hover:not(:disabled){background:#f1f5f9}
   .nav-btn:disabled{opacity:.4;cursor:not-allowed}
@@ -124,7 +124,7 @@
 </div>
 
 <!-- B. LOGIN -->
-<section id="v-login" class="hidden min-h-screen flex flex-col p-4 abstrak">
+<section id="v-login" class="hidden min-h-screen flex flex-col p-4 md:p-8 abstrak">
   <div class="flex-1 flex items-center justify-center w-full">
   <div class="w-full max-w-sm bg-white/70 backdrop-blur rounded-2xl shadow-xl px-6 pb-6 pt-3">
     <img class="js-logo mx-auto -mt-2 -mb-3 w-[11.25rem] h-[11.25rem] max-w-full object-contain" alt="SIDAK">
@@ -150,7 +150,7 @@
 <!-- C. ADMIN -->
 <section id="v-admin" class="hidden min-h-screen flex flex-col">
   <div class="js-header"></div>
-  <main class="w-full max-w-5xl mx-auto flex-1 p-4 space-y-7">
+  <main class="w-full max-w-5xl mx-auto flex-1 p-4 md:px-8 lg:px-10 space-y-7">
     <div>
       <div class="flex items-center justify-between mb-2">
         <h2 class="font-bold"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
@@ -227,7 +227,7 @@
 <!-- D. USER -->
 <section id="v-user" class="hidden min-h-screen flex flex-col">
   <div class="js-header"></div>
-  <main class="w-full max-w-5xl mx-auto flex-1 p-4 space-y-7">
+  <main class="w-full max-w-5xl mx-auto flex-1 p-4 md:px-8 lg:px-10 space-y-7">
     <div>
       <div class="flex items-center justify-between mb-2">
         <h2 class="font-bold"><i class="fa-solid fa-table-cells-large text-blue-700 mr-2"></i>Fitur Utama</h2>
@@ -258,11 +258,12 @@
         <div class="relative flex-1 min-w-0">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input id="cariData" class="inp pl-9" placeholder="Cari data (nama, NIK, kelurahan, hubungan)" oninput="renderUser()"></div>
-        <button type="button" class="btn btn-b whitespace-nowrap" onclick="cetakUser()"><i class="fa-solid fa-print mr-1"></i>Cetak</button>
+        <button type="button" class="btn btn-b whitespace-nowrap md:hidden" onclick="cetakUser()"><i class="fa-solid fa-print mr-1"></i>Cetak</button>
       </div>
-      <div class="tbl-wrap tbl-scroll mt-3"><table class="tbl tbl-v">
+      <div id="wrapData" class="tbl-wrap tbl-scroll mt-3"><table class="tbl tbl-v">
         <thead><tr><th>Nama</th><th>Kel.</th><th>TPS</th><th>Aksi</th></tr></thead>
         <tbody id="dataBody"></tbody></table></div>
+      <div class="hidden md:flex mt-2 items-center justify-between gap-2"><button type="button" class="w-9 h-9 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center" onclick="cetakUser()" title="Cetak data" aria-label="Cetak data"><i class="fa-solid fa-print"></i></button><div id="navDataV"></div></div>
     </div></div></section>
   </main>
   <footer class="text-center text-xs text-slate-500 py-6">Powered by Anto Design Concept &copy; 2026</footer>
@@ -300,7 +301,7 @@ function headerHTML(tgl = true, mw = 'max-w-5xl') {
   return `<header class="hdr relative overflow-hidden text-white">
     <img src="${HEADER_IMG_URL}" alt="" class="absolute right-0 top-0 h-full w-auto max-w-[55%] object-contain object-right opacity-90 pointer-events-none"
          style="-webkit-mask-image:linear-gradient(to left,#000 40%,transparent);mask-image:linear-gradient(to left,#000 40%,transparent)">
-    <div class="relative ${mw} mx-auto px-4 py-4 flex flex-col items-start text-left gap-1">
+    <div class="relative ${mw} mx-auto px-4 md:px-8 lg:px-10 py-4 flex flex-col items-start text-left gap-1">
       <span class="inline-flex items-center justify-center w-16 h-16"><img src="${LOGO_URL}" alt="SIDAK" class="max-w-full max-h-full object-contain"></span>
       <p class="font-bold text-sm sm:text-base leading-tight">Sistem Informasi Data Konstituen</p>
       ${tgl ? '<p class="js-date text-xs sm:text-sm text-blue-100"></p>' : ''}
@@ -642,9 +643,11 @@ function tabelV(urut, baris, wid, kiri = '') {
     <div class="mt-2 flex items-center justify-between gap-2"><div>${kiri}</div>${navBarV(wid)}</div>`;
 }
 $('navPendataV').innerHTML = navBarV('wrapPendata'); pasangV('wrapPendata');
-window.addEventListener('resize', () => ['wrapPendata', 'wrapKons', 'wrapCetak'].forEach(id => batasBaris(id)));
+$('navDataV').innerHTML = navBarV('wrapData'); pasangV('wrapData');
+window.addEventListener('resize', () => ['wrapPendata', 'wrapKons', 'wrapCetak', 'wrapData'].forEach(id => batasBaris(id)));
 MQ_LEBAR.addEventListener('change', () => {
-  if (!S || S.role !== 'admin') return;
+  if (!S) return;
+  if (S.role !== 'admin') { batasBaris('wrapData'); return; }
   if (!MQ_LEBAR.matches) lihatInlineAktif = false;
   renderKons(); renderLihatInline(); renderPendata();
 });
@@ -1082,7 +1085,7 @@ const SHEETS = {
     judul: 'Data Statistik', ikon: 'fa-chart-pie',
     body: () => `
       <div class="md:grid md:grid-cols-2 md:gap-10">
-      <div>
+      <div class="md:pl-8">
         <h4 class="font-bold text-sm mb-3">Keadaan Data</h4>
         ${donutHTML('s')}
       </div>
@@ -1187,6 +1190,7 @@ function renderUser() {
           <td>${esc(d.no_tps || '-')}</td>
           <td><button type="button" class="w-8 h-8 rounded-lg bg-blue-600/30 text-blue-800 hover:bg-blue-600/40 flex items-center justify-center" onclick="formData(${UDATA.indexOf(d)})" title="Ubah data" aria-label="Ubah data"><i class="fa-solid fa-pen-to-square"></i></button></td></tr>`).join('')
     : `<tr><td colspan="4" class="text-slate-500">${q ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data. Gunakan fitur Pendataan untuk mulai mendata.'}</td></tr>`;
+  batasBaris('wrapData');
 }
 function ubahDiri(closable = true) {
   openForm({
@@ -1221,6 +1225,7 @@ function pilihFitur(k) {
   $('formPendataan').innerHTML = '';
   if (FITUR === 'pendataan') formPendataan();
   if (FITUR === 'data') renderUser();
+  requestAnimationFrame(() => batasBaris('wrapData'));
   if (FITUR) $('sec-' + FITUR).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 function formPendataan() {
