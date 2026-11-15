@@ -12,6 +12,12 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+  /* Skala tampilan per ukuran layar: semua ukuran (huruf, tombol, ikon, jarak, lebar kolom) memakai rem,
+     sehingga cukup mengubah ukuran dasar. HP = ukuran sekarang; persen menghormati pengaturan font browser. */
+  html{font-size:100%}
+  @media (min-width:768px){html{font-size:106.25%}}    /* tablet */
+  @media (min-width:1024px){html{font-size:112.5%}}    /* tablet landscape / laptop */
+  @media (min-width:1440px){html{font-size:118.75%}}   /* PC layar lebar */
   .hdr{background:linear-gradient(110deg,#0a2463 0%,#1d4ed8 55%,#60a5fa 100%)}
   .inp{width:100%;border:1px solid #cbd5e1;border-radius:.6rem;padding:.6rem .8rem;outline:none;background:#fff}
   .inp:focus{border-color:#1d4ed8;box-shadow:0 0 0 3px #1d4ed833}
@@ -870,7 +876,7 @@ function donutHTML(p) {
         <circle id="${p}DnGanda" cx="60" cy="60" r="48" fill="none" stroke="#dc2626" stroke-width="16" style="stroke-dasharray:0 301.6;transition:stroke-dasharray .9s ease,stroke-dashoffset .9s ease"/>
         <circle id="${p}DnBersih" cx="60" cy="60" r="48" fill="none" stroke="#0d9488" stroke-width="16" style="stroke-dasharray:0 301.6;transition:stroke-dasharray .9s ease,stroke-dashoffset .9s ease"/>
       </svg>
-      <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="${p}DnTotal" class="text-2xl font-extrabold">0</span><span class="text-[11px] text-slate-500">Total data</span></div>
+      <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="${p}DnTotal" class="text-2xl font-extrabold">0</span><span class="text-[0.6875rem] text-slate-500">Total data</span></div>
     </div>
     <div class="flex-1 space-y-3 text-sm">
       <div><p class="flex items-center gap-2 font-semibold"><span class="w-3 h-3 rounded-full" style="background:#dc2626"></span>Ganda</p><p id="${p}StGanda" class="font-extrabold pl-5">0 (0,0%)</p></div>
