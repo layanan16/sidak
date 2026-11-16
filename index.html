@@ -106,6 +106,14 @@
   .sheet.open .sheet-bg{opacity:1}
   .sheet-box{position:relative;width:100%;max-width:48rem;max-height:90vh;max-height:90dvh;background:#fff;border-radius:1.5rem 1.5rem 0 0;box-shadow:0 -12px 40px #0f172a40;display:flex;flex-direction:column;overflow:hidden;transform:translateY(100%);transition:transform .5s cubic-bezier(.22,1,.36,1)}
   .sheet.open .sheet-box{transform:translateY(0)}
+  /* Rincian Pendata: tablet/PC tampil di tengah layar (HP tetap dari bawah) */
+  @media (min-width:768px){
+    .sheet.tengah{align-items:center;padding:1rem}
+    .sheet.tengah .sheet-box{max-width:32rem;border-radius:1.5rem;opacity:0;transform:translateY(1.5rem) scale(.97);transition:transform .4s cubic-bezier(.22,1,.36,1),opacity .3s ease}
+    .sheet.tengah.open .sheet-box{opacity:1;transform:none}
+    .sheet.tengah .sheet-box>div:first-child{display:none}
+    .sheet.tengah .sheet-box>div:nth-child(2){padding-top:1rem}
+  }
   @media (prefers-reduced-motion:reduce){.sheet,.sheet-bg,.sheet-box,.bar{transition-duration:.01s!important}}
   /* Grafik batang Jumlah Data */
   .chart{height:12rem;display:flex;align-items:stretch;gap:1rem;border-bottom:2px solid #cbd5e1;padding:0 .5rem}
@@ -184,17 +192,22 @@
     <section id="a-kons" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
       <div class="bg-gradient-to-br from-indigo-600 to-indigo-400 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-table-list mr-2"></i>Data Konstituen</h2></div>
       <div class="px-4 py-4">
-      <div class="md:flex md:items-end md:gap-3"><div class="relative md:flex-1">
+      <div class="md:flex md:items-end md:gap-3"><div class="md:flex-1">
+        <label for="cariKons" class="hidden md:block text-xs font-semibold text-slate-600">Cari Data</label>
+        <div class="relative md:mt-1">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
         <input id="cariKons" type="text" autocomplete="off" class="inp pl-9 pr-10" placeholder="Cari data (nama, NIK, pendata, wilayah, TPS)" oninput="renderKons()">
         <button id="cariKonsX" type="button" class="hidden absolute right-1 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-700" onclick="hapusCariKons()" aria-label="Hapus pencarian"><i class="fa-solid fa-xmark"></i></button>
+        </div>
       </div>
       <div class="grid grid-cols-2 gap-2 mt-2 md:mt-0 md:flex-none md:grid-cols-[10rem_10rem]">
         <label class="text-xs font-semibold text-slate-600">Keadaan Data
           <select id="fKead" class="inp mt-1 font-normal text-sm" onchange="renderKons()"><option value="semua">Semua</option><option value="ganda">Ganda</option><option value="bersih">Bersih</option></select></label>
         <label class="text-xs font-semibold text-slate-600">Potensial
           <select id="fPot" class="inp mt-1 font-normal text-sm" onchange="renderKons()"><option value="semua">Semua</option><option value="Tinggi">Tinggi</option><option value="Sedang">Sedang</option><option value="Rendah">Rendah</option></select></label>
-      </div></div>
+      </div>
+      <button type="button" class="btn btn-b hidden md:flex flex-none items-center whitespace-nowrap" style="padding:.6rem 1rem;border:1px solid transparent" onclick="cetakKons()"><i class="fa-solid fa-file-pdf mr-1"></i>Unduh pdf</button>
+      </div>
       <div id="konsBody" class="mt-3"></div>
     </div></div></section>
 
@@ -340,7 +353,7 @@ function setRole() {
   const r = (document.querySelector('input[name="role"]:checked') || {}).value || ''; msg('');
   cekSeq++; clearTimeout(cekTimer);
   step = r === 'admin' ? 'admin' : r === 'user' ? 'hp' : '';
-  if (r === 'admin') $('blk-admin').classList.remove('hidden');
+  if (r === 'admin') { $('blk-admin').classList.remove('hidden'); $('pAdmin').focus(); }   // kursor langsung di kolom password
   if (r === 'user') $('blk-hp').classList.remove('hidden');   // langsung tampil kotak nomor telepon, tanpa tombol Lanjut
   $('btnMasuk').classList.toggle('hidden', step !== 'admin');
   $('btnMasuk').textContent = 'Masuk';
@@ -927,7 +940,7 @@ function renderKons() {
   const cetakBtn = '<button type="button" class="w-9 h-9 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center" onclick="cetakKons()" title="Cetak data" aria-label="Cetak data"><i class="fa-solid fa-print"></i></button>';
   const urut = urutLihat(rows);
   if (lebar) {   // tablet/PC: tabel menurun, 20 baris lalu digulir
-    $('konsBody').innerHTML = head + tabelV(urut, BARIS_KONS, 'wrapKons', cetakBtn);
+    $('konsBody').innerHTML = head + tabelV(urut, BARIS_KONS, 'wrapKons');
     pasangV('wrapKons'); $('wrapKons').scrollTop = y0;
   } else {       // HP: tabel melintang
     $('konsBody').innerHTML = head + tabelLihat(urut, 'wrapKons', BARIS_KONS, cetakBtn);
@@ -1089,7 +1102,7 @@ const SHEETS = {
         <h4 class="font-bold text-sm mb-3">Keadaan Data</h4>
         ${donutHTML('s')}
       </div>
-      <div>
+      <div class="md:pr-8">
       <h4 class="font-bold text-sm mt-7 md:mt-0 mb-3">Data Potensial</h4>
       <div class="chart">${STAT_POT.map(([k, , c]) =>
         `<div class="chart-col"><span id="spv-${k}" class="text-xs font-extrabold mb-1 whitespace-nowrap">0 (0,0%)</span><div id="spb-${k}" class="bar" style="background:${c}"></div></div>`).join('')}</div>
@@ -1116,6 +1129,7 @@ const SHEETS = {
 };
 function openSheet(k) {
   const c = SHEETS[k]; SHEET = k;
+  $('sheet').classList.toggle('tengah', k === 'pendata');
   $('sheetBox').innerHTML = `<div class="pt-2.5 pb-1 flex justify-center"><span class="block w-10 h-1.5 rounded-full bg-slate-300"></span></div>
     <div class="flex items-center justify-between px-5 pt-1 pb-3 border-b border-slate-100">
       <h3 class="font-bold text-lg"><i class="fa-solid ${c.ikon} text-blue-700 mr-2"></i>${c.judul}</h3>
