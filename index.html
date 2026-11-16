@@ -314,8 +314,8 @@ function headerHTML(tgl = true, mw = 'max-w-5xl') {
   return `<header class="hdr relative overflow-hidden text-white">
     <img src="${HEADER_IMG_URL}" alt="" class="absolute right-0 top-0 h-full w-auto max-w-[55%] object-contain object-right opacity-90 pointer-events-none"
          style="-webkit-mask-image:linear-gradient(to left,#000 40%,transparent);mask-image:linear-gradient(to left,#000 40%,transparent)">
-    <div class="relative ${mw} mx-auto px-4 md:px-8 lg:px-10 py-4 flex flex-col items-start text-left gap-1">
-      <span class="inline-flex items-center justify-center w-16 h-16"><img src="${LOGO_URL}" alt="SIDAK" class="max-w-full max-h-full object-contain"></span>
+    <div class="relative ${mw} mx-auto px-4 md:px-8 lg:px-10 pt-1 pb-4 flex flex-col items-start text-left gap-1">
+      <span class="inline-flex items-center justify-center w-16 h-16 -mt-1"><img src="${LOGO_URL}" alt="SIDAK" class="max-w-full max-h-full object-contain"></span>
       <p class="font-bold text-sm sm:text-base leading-tight">Sistem Informasi Data Konstituen</p>
       ${tgl ? '<p class="js-date text-xs sm:text-sm text-blue-100"></p>' : ''}
     </div></header>`;
