@@ -222,7 +222,7 @@
         <label class="text-xs font-semibold text-slate-600">Potensial
           <select id="fPot" class="inp mt-1 font-normal text-sm" onchange="renderKons()"><option value="semua">Semua</option><option value="Tinggi">Tinggi</option><option value="Sedang">Sedang</option><option value="Rendah">Rendah</option></select></label>
       </div>
-      <button type="button" class="btn btn-b hidden md:flex flex-none items-center whitespace-nowrap" style="padding:.6rem 1rem;border:1px solid transparent" onclick="cetakKons()"><i class="fa-solid fa-file-pdf mr-1"></i>Unduh pdf</button>
+      <button type="button" class="btn btn-b hidden md:flex flex-none items-center whitespace-nowrap" style="padding:.6rem 1rem;border:1px solid transparent" id="btnPdfKons" onclick="cetakKons()"><i class="fa-solid fa-file-pdf mr-1"></i>Unduh pdf</button>
       </div>
       <div id="konsBody" class="mt-3"></div>
     </div></div></section>
@@ -239,7 +239,7 @@
           <option value="tps">TPS &amp; Wilayah</option>
         </select>
         <select id="val" class="inp" onchange="infoCetak()"></select>
-        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-file-pdf mr-1"></i>Lihat pdf</button></div>
+        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button id="btnPdfAdmin" class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-file-pdf mr-1"></i>Lihat pdf</button></div>
       </div>
       <div id="wil" class="hidden grid sm:grid-cols-3 gap-2 mt-2">
         <select id="wKec" class="inp" onchange="fillWil('kec')" aria-label="Kecamatan"></select>
@@ -793,25 +793,24 @@ function dataCetak() {
   if (by) { const v = $('val').value; return { rows: ADATA.filter(d => d[by] === v), judul: $('by').selectedOptions[0].text + ': ' + v }; }
   return { rows: ADATA, judul: 'Semua Data' };
 }
-const gandaTotal = () => ADATA.filter(d => d.ganda).length;
+const pdfGanda = rows => rows.filter(d => d.ganda).length;
+// Tombol Unduh/Lihat pdf nonaktif bila data yang sedang ditampilkan masih memuat data ganda
+function setPdfBtn(id, rows) {
+  const b = $(id); if (!b) return;
+  const g = pdfGanda(rows);
+  b.disabled = g > 0;
+  b.title = g > 0 ? 'Tidak aktif: masih ada ' + g + ' data ganda pada tampilan ini' : '';
+}
+const pesanGanda = g => notif('Masih ada ' + g + ' data ganda pada tampilan ini. Tangani data ganda atau persempit pencarian sampai tidak ada data ganda.', 'Data ganda masih ada', 'info');
 function infoCetak() {
-  const { rows } = dataCetak();
-  $('cetakInfo').textContent = rows.length + ' data akan dicetak';
-  updFiturCetak();
+  const { rows } = dataCetak(), g = pdfGanda(rows);
+  $('cetakInfo').textContent = rows.length + ' data akan dicetak' + (g ? ' · Lihat pdf aktif setelah ' + g + ' data ganda pada tampilan ini ditangani.' : '');
+  setPdfBtn('btnPdfAdmin', rows);
   if (lihatInlineAktif) renderLihatInline();
 }
-// Ikon Unduh Data di Fitur Utama (admin) nonaktif selama masih ada data ganda
-function updFiturCetak() {
-  const g = gandaTotal(), b = document.querySelector('#v-admin [data-fitur="cetak"]');
-  if (!b) return;
-  b.disabled = g > 0;
-  b.title = g > 0 ? 'Tidak aktif: masih ada ' + g + ' data ganda. Tangani dulu di Data Konstituen.' : '';
-  if (g > 0 && AFITUR === 'cetak') pilihFiturAdmin('cetak');   // bila sedang terbuka, tutup
-}
 function cetakAdmin() {
-  const g = gandaTotal();
-  if (g > 0) return notif('Masih ada ' + g + ' data ganda. Tangani data ganda terlebih dahulu sebelum mengunduh data.', 'Data ganda masih ada', 'info');
-  const { rows, judul } = dataCetak();
+  const { rows, judul } = dataCetak(), g = pdfGanda(rows);
+  if (g > 0) return pesanGanda(g);
   printRows('Laporan Data Konstituen - ' + judul, rows, true);
 }
 async function loadPendata() {
@@ -984,9 +983,10 @@ function renderKons() {
   $('cariKonsX').classList.toggle('hidden', !$('cariKons').value);
   const lama = $('wrapKons'), x0 = lama ? lama.scrollLeft : 0, y0 = lama ? lama.scrollTop : 0;
   const rows = filterKons(), lebar = MQ_LEBAR.matches;
+  setPdfBtn('btnPdfKons', rows);
   const head = `<p class="text-xs text-slate-500 mb-2">${rows.length} dari ${ADATA.length} data &middot; ${rows.filter(d => d.ganda).length} ganda</p>`;
   if (!rows.length) { $('konsBody').innerHTML = head + '<p class="text-slate-500 text-sm">Tidak ada data yang cocok.</p>'; return; }
-  const cetakBtn = '<button type="button" class="w-9 h-9 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center" onclick="cetakKons()" title="Cetak data" aria-label="Cetak data"><i class="fa-solid fa-print"></i></button>';
+  const cetakBtn = '<button type="button" class="w-9 h-9 rounded-lg bg-blue-700 hover:bg-blue-800 text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed" ' + (pdfGanda(rows) ? 'disabled' : '') + ' onclick="cetakKons()" title="Cetak data" aria-label="Cetak data"><i class="fa-solid fa-print"></i></button>';
   const urut = urutLihat(rows);
   if (lebar) {   // tablet/PC: tabel menurun, 20 baris lalu digulir
     $('konsBody').innerHTML = head + tabelV(urut, BARIS_KONS, 'wrapKons');
@@ -997,6 +997,7 @@ function renderKons() {
   }
 }
 function cetakKons() {
+  const g = pdfGanda(filterKons()); if (g > 0) return pesanGanda(g);
   const q = String($('cariKons').value || '').trim(), kd = $('fKead').value, pt = $('fPot').value;
   const bag = [kd !== 'semua' && (kd === 'ganda' ? 'Ganda' : 'Bersih'), pt !== 'semua' && 'Potensi ' + pt, q && 'Pencarian "' + q + '"'].filter(Boolean);
   printRows('Laporan Data Konstituen - ' + (bag.join(', ') || 'Semua Data'), urutLihat(filterKons()), true, q);
@@ -1078,7 +1079,7 @@ function bukaDetailPendata(id) {
         <input id="cariDp" type="text" autocomplete="off" class="inp pl-9" placeholder="Cari data (nama, NIK, no. HP, hubungan, wilayah, TPS)" oninput="renderDetailPendata()">
       </div>
       <div id="dpInfo" class="flex-none mt-2 md:mt-0"></div>
-      <button type="button" class="btn btn-b whitespace-nowrap flex-none mt-2 md:mt-0" onclick="unduhDetailPendata()"><i class="fa-solid fa-file-pdf mr-1"></i>Unduh pdf</button>
+      <button id="btnPdfDp" type="button" class="btn btn-b whitespace-nowrap flex-none mt-2 md:mt-0" onclick="unduhDetailPendata()"><i class="fa-solid fa-file-pdf mr-1"></i>Unduh pdf</button>
     </div>
     <div id="dpTabel" class="mt-3"></div>`;
   pasangX($('cariDp'), 'Hapus pencarian');
@@ -1105,6 +1106,7 @@ function renderDetailPendata() {
   $('dpHp').textContent = p.nama && p.no_hp ? p.no_hp : '';
   const semua = ADATA.filter(d => d.pendata_id === DPEND), rows = filterDp(), q = String($('cariDp').value || '').trim();
   const lama = $('wrapDp'), y0 = lama ? lama.scrollTop : 0;
+  setPdfBtn('btnPdfDp', rows);
   $('dpInfo').innerHTML = `<div class="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 whitespace-nowrap">
       <span class="flex items-center gap-1.5" title="Jumlah data"><i class="fa-solid fa-database text-blue-600"></i><b>${q ? rows.length + ' dari ' + semua.length : semua.length}</b> data</span>
       <span class="flex items-center gap-1.5" title="Data ganda"><i class="fa-solid fa-clone text-red-600"></i><b>${(q ? rows : semua).filter(d => d.ganda).length}</b> ganda</span></div>`;
@@ -1114,6 +1116,7 @@ function renderDetailPendata() {
   if (rows.length) { pasangV('wrapDp'); $('wrapDp').scrollTop = y0; }
 }
 function unduhDetailPendata() {
+  const g = pdfGanda(filterDp()); if (g > 0) return pesanGanda(g);
   const p = PEND.find(x => x.id === DPEND) || {}, q = String((($('cariDp') || {}).value) || '').trim();
   printRows('Laporan Data Konstituen - Pendata: ' + (p.nama || p.no_hp || ''), urutLihat(filterDp()), true, q);
 }
