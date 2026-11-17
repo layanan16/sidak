@@ -24,7 +24,7 @@
   .inp:disabled{background:#f1f5f9;color:#94a3b8;cursor:not-allowed}
   #cariKons::placeholder,#cariPendata::placeholder,#cariData::placeholder{font-size:.8rem}
   .btn{background:#15803d;color:#fff;font-weight:700;border-radius:.6rem;padding:.65rem 1rem}
-  .btn:hover{background:#166534} .btn:disabled{opacity:.6}
+  .btn:hover{background:#166534} .btn:disabled{opacity:.6;cursor:not-allowed}
   .btn-b{background:#1d4ed8} .btn-b:hover{background:#1e40af}
   .tbl-wrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:.75rem;background:#fff}
   .tbl{width:100%;font-size:.8rem;border-collapse:separate;border-spacing:0}
@@ -81,6 +81,17 @@
   .pv-b{height:2.9rem;border-radius:.8rem;font-weight:800;font-size:.95rem}
   .pv-b1{background:#eef2f9;color:#1e293b}.pv-b1:hover{background:#e2e8f3}
   .pv-b2{background:linear-gradient(90deg,#1a56c4,#2f6fe4);color:#fff}.pv-b2:hover{filter:brightness(.95)}
+  /* Pratinjau PDF tablet/PC: kartu lebar di tengah layar (HP tetap layar penuh) */
+  @media (min-width:768px){
+    .pv{background:rgba(10,36,99,.88);padding:1.25rem;align-items:center}
+    .pv-col{max-width:62rem;height:100%;max-height:60rem;border-radius:1rem;overflow:hidden;background:#0a2463;box-shadow:0 20px 60px #00000066}
+    .pv-head{padding:1rem 1.25rem .85rem}
+    .pv-t1{font-size:1.15rem}.pv-t2{font-size:.8rem}
+    .pv-area{padding:1.5rem 1.25rem}
+    .pv-foot{display:flex;justify-content:flex-end;gap:.75rem;padding:.9rem 1.25rem}
+    .pv-b{min-width:10rem;padding:0 1.5rem}
+  }
+  @media (min-width:1280px){.pv-col{max-width:76rem}}
   /* Tabel Data Konstituen: vertikal, scroll ke bawah, judul kolom menempel di atas */
   .tbl-scroll{max-height:60vh;max-height:60dvh;overflow:auto;background:#fff}
   .tbl-v{font-size:.8rem}
@@ -176,6 +187,7 @@
     <section id="a-kelola" class="hidden"><div class="bg-white rounded-2xl shadow overflow-hidden">
       <div class="bg-gradient-to-br from-blue-600 to-blue-400 text-white px-4 py-3"><h2 class="font-bold"><i class="fa-solid fa-users-gear mr-2"></i>Kelola Pendata</h2></div>
       <div class="px-4 py-4">
+      <div id="kelolaList">
       <div class="md:flex md:flex-row-reverse md:items-center md:gap-3 md:mb-3">
         <button class="btn md:flex-none md:whitespace-nowrap" onclick="formPendata()"><i class="fa-solid fa-plus mr-1"></i>Tambah Pendata</button>
         <div class="relative my-3 md:my-0 md:flex-1">
@@ -183,9 +195,11 @@
           <input id="cariPendata" class="inp pl-9" placeholder="Cari pendata (nama atau nomor telepon)" oninput="renderPendata()"></div>
       </div>
       <div id="wrapPendata" class="tbl-wrap"><table class="tbl tbl-v">
-        <thead><tr><th>Nama</th><th>No. HP</th><th>Status</th></tr></thead>
+        <thead><tr><th>Nama Pendata</th><th>No. HP</th><th>Status</th><th class="hidden md:table-cell">Ganda</th><th class="hidden md:table-cell">Aksi</th></tr></thead>
         <tbody id="pendataBody"></tbody></table></div>
       <div class="mt-2 flex items-center justify-between gap-2"><p class="text-xs text-slate-500">Ketuk baris untuk melihat rincian pendata.</p><div id="navPendataV"></div></div>
+      </div>
+      <div id="kelolaDetail" class="hidden"></div>
     </div></div></section>
 
     <!-- Data Konstituen (menyatu dengan halaman, tanpa latar) -->
@@ -223,7 +237,7 @@
           <option value="tps">TPS &amp; Wilayah</option>
         </select>
         <select id="val" class="inp" onchange="infoCetak()"></select>
-        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-file-pdf mr-1"></i>Lihat pdf</button></div>
+        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button id="btnPdfAdmin" class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-file-pdf mr-1"></i>Lihat pdf</button></div>
       </div>
       <div id="wil" class="hidden grid sm:grid-cols-3 gap-2 mt-2">
         <select id="wKec" class="inp" onchange="fillWil('kec')" aria-label="Kecamatan"></select>
@@ -271,6 +285,7 @@
         <div class="relative flex-1 min-w-0">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
           <input id="cariData" class="inp pl-9" placeholder="Cari data (nama, NIK, kelurahan, hubungan)" oninput="renderUser()"></div>
+        <button type="button" class="btn whitespace-nowrap" style="background:#475569" onclick="bukaHistory()" title="Data yang dihapus admin" aria-label="History"><i class="fa-solid fa-clock-rotate-left md:mr-1"></i><span class="hidden md:inline">History</span></button>
         <button type="button" class="btn btn-b whitespace-nowrap" onclick="cetakUser()"><i class="fa-solid fa-print mr-1 md:hidden"></i><i class="fa-solid fa-file-pdf mr-1 hidden md:inline"></i><span class="md:hidden">Cetak</span><span class="hidden md:inline">Unduh pdf</span></button>
       </div>
       <div id="wrapData" class="tbl-wrap tbl-scroll mt-3"><table class="tbl tbl-v">
@@ -657,11 +672,11 @@ function tabelV(urut, baris, wid, kiri = '') {
 }
 $('navPendataV').innerHTML = navBarV('wrapPendata'); pasangV('wrapPendata');
 $('navDataV').innerHTML = navBarV('wrapData'); pasangV('wrapData');
-window.addEventListener('resize', () => ['wrapPendata', 'wrapKons', 'wrapCetak', 'wrapData'].forEach(id => batasBaris(id)));
+window.addEventListener('resize', () => ['wrapPendata', 'wrapDp', 'wrapKons', 'wrapCetak', 'wrapData'].forEach(id => batasBaris(id)));
 MQ_LEBAR.addEventListener('change', () => {
   if (!S) return;
   if (S.role !== 'admin') { batasBaris('wrapData'); return; }
-  if (!MQ_LEBAR.matches) lihatInlineAktif = false;
+  if (!MQ_LEBAR.matches) { lihatInlineAktif = false; tutupDetailPendata(); }
   renderKons(); renderLihatInline(); renderPendata();
 });
 
@@ -727,7 +742,7 @@ async function loadAdmin(silent) {
     hitungPrioritas();
     if ($('lihatBody')) renderLihat();
     renderLihatPend();
-    renderKons(); renderSheet();
+    renderKons(); renderSheet(); renderDetailPendata();
     if (lihatInlineAktif) renderLihatInline();
     fillVal(); loadPendata();
   } catch (e) { if (!silent) notif('Gagal memuat data: ' + e.message); }
@@ -776,12 +791,17 @@ function dataCetak() {
   if (by) { const v = $('val').value; return { rows: ADATA.filter(d => d[by] === v), judul: $('by').selectedOptions[0].text + ': ' + v }; }
   return { rows: ADATA, judul: 'Semua Data' };
 }
+const gandaTotal = () => ADATA.filter(d => d.ganda).length;
 function infoCetak() {
-  const { rows } = dataCetak();
-  $('cetakInfo').textContent = rows.length + ' data akan dicetak';
+  const { rows } = dataCetak(), g = gandaTotal();
+  $('cetakInfo').textContent = rows.length + ' data akan dicetak' + (g ? ' · Tombol Lihat pdf aktif setelah ' + g + ' data ganda ditangani (menu Data Konstituen).' : '');
+  const b = $('btnPdfAdmin');
+  if (b) { b.disabled = g > 0; b.title = g > 0 ? 'Tersedia setelah tidak ada data ganda' : ''; }
   if (lihatInlineAktif) renderLihatInline();
 }
 function cetakAdmin() {
+  const g = gandaTotal();
+  if (g > 0) return notif('Masih ada ' + g + ' data ganda. Tangani data ganda terlebih dahulu sebelum mengunduh data.', 'Data ganda masih ada', 'info');
   const { rows, judul } = dataCetak();
   printRows('Laporan Data Konstituen - ' + judul, rows, true);
 }
@@ -792,15 +812,23 @@ async function loadPendata() {
 function renderPendata() {
   const q = ($('cariPendata').value || '').toLowerCase().trim();
   const list = PEND.filter(p => !q || (p.nama || '').toLowerCase().includes(q) || (p.no_hp || '').includes(q));
+  const gandaPer = {};
+  ADATA.forEach(d => { if (d.ganda) gandaPer[d.pendata_id] = (gandaPer[d.pendata_id] || 0) + 1; });
   const badge = p => p.sudah_registrasi
     ? '<span role="img" aria-label="Aktif" title="Aktif">✅</span>'
     : '<span role="img" aria-label="Belum registrasi" title="Belum registrasi">❌</span>';
+  const ganda = p => gandaPer[p.id]
+    ? `<span class="rounded-full bg-red-100 text-red-700 text-xs font-semibold px-2.5 py-1" title="${gandaPer[p.id]} data ganda">${gandaPer[p.id]}</span>`
+    : '<span class="text-slate-400">-</span>';
+  const aksi = p => `<button type="button" class="ba ba-y" onclick="event.stopPropagation();resetPw('${p.id}')" title="Reset akun"><i class="fa-solid fa-key mr-1"></i>Reset</button><button type="button" class="ba ba-r" onclick="event.stopPropagation();hapusPendata('${p.id}')" title="Hapus pendata"><i class="fa-solid fa-trash-can mr-1"></i>Hapus</button>`;
   $('pendataBody').innerHTML = list.length
-    ? list.map(p => `<tr class="cursor-pointer" tabindex="0" role="button" onclick="bukaPendata('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bukaPendata('${p.id}')}">
+    ? list.map(p => `<tr class="cursor-pointer" tabindex="0" role="button" onclick="bukaPendata('${p.id}')" onkeydown="if(event.target!==this)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();bukaPendata('${p.id}')}">
         <td class="font-semibold">${esc(p.nama || '-')}</td>
         <td class="tabular-nums whitespace-nowrap">${esc(p.no_hp)}</td>
-        <td class="whitespace-nowrap">${badge(p)}</td></tr>`).join('')
-    : `<tr><td colspan="3" class="text-slate-500">${q ? 'Tidak ada pendata yang cocok dengan pencarian.' : 'Belum ada pendata. Tekan Tambah Pendata untuk mendaftarkan nomor telepon.'}</td></tr>`;
+        <td class="whitespace-nowrap">${badge(p)}</td>
+        <td class="whitespace-nowrap hidden md:table-cell">${ganda(p)}</td>
+        <td class="whitespace-nowrap hidden md:table-cell">${aksi(p)}</td></tr>`).join('')
+    : `<tr><td colspan="5" class="text-slate-500">${q ? 'Tidak ada pendata yang cocok dengan pencarian.' : 'Belum ada pendata. Tekan Tambah Pendata untuk mendaftarkan nomor telepon.'}</td></tr>`;
   batasBaris('wrapPendata');
 }
 function formPendata() {
@@ -844,7 +872,7 @@ function renderLihatInline() {
   const { rows, judul } = dataCetak();
   const head = `<p class="text-xs text-slate-500 mt-4 mb-2">${esc(judul)} &middot; ${rows.length} data &middot; ${rows.filter(d => d.ganda).length} ganda</p>`;
   if (!rows.length) { box.innerHTML = head + '<p class="text-slate-500 text-sm">Tidak ada data pada filter ini.</p>'; return; }
-  box.innerHTML = head + tabelV(urutLihat(rows), BARIS_KONS, 'wrapCetak');
+  box.innerHTML = head + tabelV(urutLihat(rows), BARIS_CETAK, 'wrapCetak');
   pasangV('wrapCetak'); $('wrapCetak').scrollTop = y0;
 }
 const BARIS_LIHAT = [
@@ -870,6 +898,7 @@ const BARIS_KONS = [
   BARIS_LIHAT[8],   // Ket.
   BARIS_LIHAT[9]    // Aksi
 ];   // NIK tetap ada di data (penanda ganda), hanya tidak ditampilkan
+const BARIS_CETAK = BARIS_KONS.slice(0, 5);   // Unduh Data: tanpa kolom Ket. dan Aksi
 function urutLihat(rows) {
   return [...rows].sort((a, b) => {
     if (a.ganda !== b.ganda) return a.ganda ? -1 : 1;                    // data ganda di depan, dikelompokkan per NIK
@@ -890,23 +919,34 @@ function renderLihat() {
   const { rows, judul } = dataCetak();
   const head = `<p class="text-xs text-slate-500 mb-2">${esc(judul)} &middot; ${rows.length} data &middot; ${rows.filter(d => d.ganda).length} ganda</p>`;
   if (!rows.length) { $('lihatBody').innerHTML = head + '<p class="text-slate-500 text-sm">Tidak ada data pada filter ini.</p>'; return; }
-  $('lihatBody').innerHTML = head + tabelLihat(urutLihat(rows), 'wrapLihat', BARIS_KONS);
+  $('lihatBody').innerHTML = head + tabelLihat(urutLihat(rows), 'wrapLihat', BARIS_CETAK);
   pasangNav('wrapLihat'); $('wrapLihat').scrollLeft = x0;
 }
-async function hapusGanda(id) {
+// Penghapusan data oleh admin dicatat ke History pendata (alasan: Ganda atau Prioritas Rendah/Sedang/Tinggi)
+async function hapusData(id) {
   const d = ADATA.find(x => x.id === id); if (!d) return;
-  const ok = await konfirmasi({ judul: 'Hapus data ganda?', tipe: 'bahaya', tombol: 'Ya, hapus',
-    pesan: 'Data "' + d.nama + '" (NIK ' + d.nik + ') dari ' + (d.pendata_nama || 'pendata') + ' akan dihapus permanen dan tidak bisa dikembalikan.'
+  const alasan = d.ganda ? 'Ganda' : 'Prioritas ' + (d.potensi || '-');
+  const ok = await konfirmasi({ judul: 'Hapus data?', tipe: 'bahaya', tombol: 'Ya, hapus',
+    pesan: 'Data "' + d.nama + '" (NIK ' + d.nik + ') dari ' + (d.pendata_nama || 'pendata') + ' akan dihapus dengan alasan: ' + alasan + '. '
+      + (d.potensi === 'Tinggi' ? 'Data prioritas Tinggi dapat dikembalikan oleh pendata lewat History.' : 'Data ini hanya tercatat di History pendata dan tidak bisa dikembalikan.')
       + (d.unggul ? ' Perhatian: data ini memiliki prioritas lebih baik dari data ganda lainnya, hapus hanya bila memang keliru.' : '') });
   if (!ok) return;
-  try { await rpc('admin_data_hapus', { p_pass: S.pass, p_id: id }); await loadAdmin(true); toast('Data berhasil dihapus'); }
-  catch (e) { notif(e.message, 'Gagal menghapus data'); }
+  try {
+    try { await rpc('admin_data_hapus_log', { p_pass: S.pass, p_id: id, p_alasan: alasan }); }
+    catch (e) {   // SQL History belum dijalankan: pakai penghapusan lama (tanpa riwayat)
+      if (/Could not find the function|PGRST202/i.test(String(e.message || '') + String(e.code || ''))) await rpc('admin_data_hapus', { p_pass: S.pass, p_id: id });
+      else throw e;
+    }
+    await loadAdmin(true); toast('Data berhasil dihapus');
+  } catch (e) { notif(e.message, 'Gagal menghapus data'); }
 }
+const hapusGanda = id => hapusData(id);
 
 /* ---------- Fitur Utama (admin) ---------- */
 let AFITUR = '';
 function pilihFiturAdmin(k) {
   AFITUR = AFITUR === k ? '' : k;
+  if (AFITUR !== 'kelola' && DPEND) tutupDetailPendata();
   ['kelola', 'kons', 'statistik', 'cetak'].forEach(x => $('a-' + x).classList.toggle('hidden', x !== AFITUR));
   document.querySelectorAll('#v-admin [data-fitur]').forEach(b => {
     const on = b.dataset.fitur === AFITUR;
@@ -917,7 +957,7 @@ function pilihFiturAdmin(k) {
   if (SEKSI) isiSeksi('statistik', 'a-statistik');
   if (AFITUR === 'kons') renderKons();
   if (AFITUR !== 'cetak') { lihatInlineAktif = false; renderLihatInline(); }
-  requestAnimationFrame(() => ['wrapPendata', 'wrapKons', 'wrapCetak'].forEach(id => batasBaris(id)));
+  requestAnimationFrame(() => ['wrapPendata', 'wrapDp', 'wrapKons', 'wrapCetak'].forEach(id => batasBaris(id)));
   if (AFITUR) $('a-' + AFITUR).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -994,7 +1034,80 @@ function isiStatistik() {
   });
 }
 let PSEL = '';
-function bukaPendata(id) { PSEL = id; openSheet('pendata'); }
+function bukaPendata(id) {
+  PSEL = id;
+  if (MQ_LEBAR.matches) bukaDetailPendata(id);   // tablet/PC: sub halaman tabel data pendata
+  else openSheet('pendata');                     // HP: modal Rincian Pendata
+}
+
+/* ---------- Sub halaman Data Pendata (admin, tablet/PC) ---------- */
+let DPEND = '';
+const adaDiri = d => d.is_diri || String(d.hubungan || '').toLowerCase() === 'data diri';
+const WARNA_HAPUS = { Tinggi: 'ba-g', Sedang: 'ba-y', Rendah: 'ba-r' };   // hijau / kuning / merah menurut prioritas
+const BARIS_DP = [
+  BARIS_LIHAT[0],   // Nama
+  BARIS_LIHAT[2],   // Hubungan
+  BARIS_LIHAT[3],   // Potensi
+  ['No. HP', d => d.no_hp
+    ? `<a href="${waLink(d.no_hp)}" target="_blank" rel="noopener" class="text-green-700 font-semibold hover:underline tabular-nums" title="Chat WhatsApp"><i class="fa-brands fa-whatsapp mr-1"></i>${esc(d.no_hp)}</a>`
+    : '<span class="text-slate-400">-</span>'],
+  BARIS_KONS[4],    // Kel. - TPS
+  BARIS_LIHAT[8],   // Ket.
+  ['Aksi', d => adaDiri(d) ? '<span class="text-slate-400">-</span>'
+    : `<button type="button" class="ba ${WARNA_HAPUS[d.potensi] || 'ba-r'}" onclick="hapusData('${d.id}')" title="Hapus data (prioritas ${esc(d.potensi)})"><i class="fa-solid fa-trash-can mr-1"></i>Hapus</button>`]
+];
+function bukaDetailPendata(id) {
+  DPEND = id;
+  $('kelolaList').classList.add('hidden');
+  const box = $('kelolaDetail'); box.classList.remove('hidden');
+  box.innerHTML = `<div class="flex items-center gap-3 mb-4">
+      <button type="button" class="nav-btn flex-none" onclick="tutupDetailPendata()" title="Kembali ke daftar pendata" aria-label="Kembali"><i class="fa-solid fa-arrow-left"></i></button>
+      <div class="min-w-0"><h2 id="dpNama" class="font-bold truncate"></h2><p id="dpHp" class="text-xs text-slate-500"></p></div></div>
+    <div class="md:flex md:items-center md:gap-3">
+      <div class="relative flex-1 min-w-0">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input id="cariDp" type="text" autocomplete="off" class="inp pl-9" placeholder="Cari data (nama, NIK, no. HP, hubungan, wilayah, TPS)" oninput="renderDetailPendata()">
+      </div>
+      <div id="dpInfo" class="flex-none mt-2 md:mt-0"></div>
+      <button type="button" class="btn btn-b whitespace-nowrap flex-none mt-2 md:mt-0" onclick="unduhDetailPendata()"><i class="fa-solid fa-file-pdf mr-1"></i>Unduh pdf</button>
+    </div>
+    <div id="dpTabel" class="mt-3"></div>`;
+  pasangX($('cariDp'), 'Hapus pencarian');
+  renderDetailPendata();
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function tutupDetailPendata() {
+  DPEND = '';
+  const b = $('kelolaDetail'); if (b) { b.classList.add('hidden'); b.innerHTML = ''; }
+  const l = $('kelolaList'); if (l) l.classList.remove('hidden');
+  renderPendata();
+}
+function filterDp() {
+  const q = String((($('cariDp') || {}).value) || '').toLowerCase().trim();
+  return ADATA.filter(d => d.pendata_id === DPEND &&
+    (!q || [d.nama, d.nik, d.no_hp, d.hubungan || (d.is_diri ? 'Data diri' : ''), d.potensi, d.kecamatan, d.kelurahan, d.no_tps, d.ganda ? 'Ganda' : '']
+      .some(v => String(v || '').toLowerCase().includes(q))));
+}
+function renderDetailPendata() {
+  if (!DPEND || !$('dpTabel')) return;
+  const p = PEND.find(x => x.id === DPEND);
+  if (!p) { tutupDetailPendata(); return; }   // pendata sudah dihapus
+  $('dpNama').textContent = p.nama || p.no_hp || 'Pendata';
+  $('dpHp').textContent = p.nama && p.no_hp ? p.no_hp : '';
+  const semua = ADATA.filter(d => d.pendata_id === DPEND), rows = filterDp(), q = String($('cariDp').value || '').trim();
+  const lama = $('wrapDp'), y0 = lama ? lama.scrollTop : 0;
+  $('dpInfo').innerHTML = `<div class="flex items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 whitespace-nowrap">
+      <span class="flex items-center gap-1.5" title="Jumlah data"><i class="fa-solid fa-database text-blue-600"></i><b>${q ? rows.length + ' dari ' + semua.length : semua.length}</b> data</span>
+      <span class="flex items-center gap-1.5" title="Data ganda"><i class="fa-solid fa-clone text-red-600"></i><b>${(q ? rows : semua).filter(d => d.ganda).length}</b> ganda</span></div>`;
+  $('dpTabel').innerHTML = rows.length
+    ? tabelV(urutLihat(rows), BARIS_DP, 'wrapDp')
+    : `<p class="text-slate-500 text-sm">${q ? 'Tidak ada data yang cocok dengan pencarian.' : 'Pendata ini belum memiliki data.'}</p>`;
+  if (rows.length) { pasangV('wrapDp'); $('wrapDp').scrollTop = y0; }
+}
+function unduhDetailPendata() {
+  const p = PEND.find(x => x.id === DPEND) || {}, q = String((($('cariDp') || {}).value) || '').trim();
+  printRows('Laporan Data Konstituen - Pendata: ' + (p.nama || p.no_hp || ''), urutLihat(filterDp()), true, q);
+}
 function isiPendataSheet() {
   if (!$('pDnGanda')) return;
   const p = PEND.find(x => x.id === PSEL);
@@ -1224,6 +1337,38 @@ function formData(i) {
   });
 }
 
+/* ---------- History: data yang dihapus admin (user) ---------- */
+let HIST = [];
+function bukaHistory() {
+  viewModal('History Data Dihapus', '<div id="histBody"><p class="text-slate-500 text-sm">Memuat...</p></div>');
+  muatHistory();
+}
+async function muatHistory() {
+  try { HIST = (await rpc('user_history', ua())) || []; renderHistory(); }
+  catch (e) {
+    const belum = /Could not find the function|PGRST202/i.test(String(e.message || '') + String(e.code || ''));
+    if ($('histBody')) $('histBody').innerHTML = `<p class="text-sm text-red-600">${belum ? 'Fitur History belum aktif di database. Hubungi admin.' : 'Gagal memuat History: ' + esc(e.message)}</p>`;
+  }
+}
+function renderHistory() {
+  const el = $('histBody'); if (!el) return;
+  if (!HIST.length) { el.innerHTML = '<p class="text-slate-500 text-sm">Belum ada data yang dihapus admin.</p>'; return; }
+  const tgl = s => s ? new Date(s).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-';
+  el.innerHTML = `<div class="tbl-wrap tbl-scroll"><table class="tbl tbl-v whitespace-nowrap">
+    <thead><tr><th>Nama</th><th>Tgl hapus</th><th>Alasan</th></tr></thead>
+    <tbody>${HIST.map(h => `<tr><td class="font-semibold">${esc(h.nama)}</td><td>${tgl(h.dihapus_pada)}</td><td>${h.potensi === 'Tinggi'
+      ? `<button type="button" class="ba ba-g" onclick="restoreHistory('${h.id}')" title="Kembalikan data (prioritas Tinggi)"><i class="fa-solid fa-rotate-left mr-1"></i>restore?</button>`
+      : `<span class="rounded-full bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1">${esc(h.alasan || ('Prioritas ' + (h.potensi || '-')))}</span>`}</td></tr>`).join('')}</tbody></table></div>`;
+}
+async function restoreHistory(id) {
+  const h = HIST.find(x => String(x.id) === String(id)); if (!h) return;
+  const ok = await konfirmasi({ judul: 'Kembalikan data?', tipe: 'info', tombol: 'Ya, kembalikan',
+    pesan: 'Data "' + h.nama + '" akan dikembalikan ke daftar Data Konstituen Anda.' });
+  if (!ok) return;
+  try { await rpc('user_history_restore', { ...ua(), p_id: id }); toast('Data berhasil dikembalikan'); await muatHistory(); loadUser(true); }
+  catch (e) { notif(e.message, 'Gagal mengembalikan data'); }
+}
+
 /* Seksi di halaman: Pendataan dan Data Konstituen (tekan lagi untuk menutup) */
 let FITUR = '';
 function pilihFitur(k) {
@@ -1273,6 +1418,7 @@ function pasangBack() {
     const x = $('modal').classList.contains('hidden') ? null : $('modal').querySelector('[data-x], #mx');
     if (x) { x.click(); return; }                              // modal dengan ikon X
     if (SHEET) { closeSheet(); return; }                       // modal dari bawah
+    if (DPEND) { tutupDetailPendata(); return; }               // sub halaman pendata (tablet/PC)
     tanyaKeluar();                                             // tanpa modal (atau modal wajib diisi): konfirmasi keluar
   });
 }
@@ -1351,7 +1497,7 @@ function dialogPdf({ blob, nama, judul, jumlah, halaman, filter }) {
 
   const gambar = async d => {   // halaman digambar saat mendekati layar (hemat memori)
     try {
-      const pg = await pdfDoc.getPage(+d.dataset.p), v0 = pg.getViewport({ scale: 1 }), v = pg.getViewport({ scale: 1300 / v0.width });
+      const pg = await pdfDoc.getPage(+d.dataset.p), v0 = pg.getViewport({ scale: 1 }), v = pg.getViewport({ scale: (MQ_LEBAR.matches ? 1800 : 1300) / v0.width });
       const c = document.createElement('canvas'); c.width = Math.floor(v.width); c.height = Math.floor(v.height);
       c.style.cssText = 'display:block;width:100%;height:100%';
       await pg.render({ canvasContext: c.getContext('2d'), viewport: v }).promise;
