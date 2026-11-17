@@ -105,6 +105,8 @@
   .fitur{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.6rem .15rem .55rem;border-radius:1rem;background:transparent;transition:transform .15s ease,background .15s ease,box-shadow .15s ease}
   .fitur:hover{background:#ffffff99}
   .fitur:active{transform:scale(.95)}
+  .fitur:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(1)}
+  .fitur:disabled:hover,.fitur:disabled:active{background:transparent;transform:none}
   .fitur:focus-visible{outline:2px solid #1d4ed8;outline-offset:2px}
   .fitur.aktif{background:#fff;box-shadow:0 2px 8px #0f172a1f}
   .fitur.aktif .fitur-lb{color:#1d4ed8}
@@ -237,7 +239,7 @@
           <option value="tps">TPS &amp; Wilayah</option>
         </select>
         <select id="val" class="inp" onchange="infoCetak()"></select>
-        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button id="btnPdfAdmin" class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-file-pdf mr-1"></i>Lihat pdf</button></div>
+        <div class="flex gap-2"><button class="btn flex-1" onclick="lihatAdmin()"><i class="fa-solid fa-eye mr-1"></i>Lihat Data</button><button class="btn btn-b flex-1" onclick="cetakAdmin()"><i class="fa-solid fa-file-pdf mr-1"></i>Lihat pdf</button></div>
       </div>
       <div id="wil" class="hidden grid sm:grid-cols-3 gap-2 mt-2">
         <select id="wKec" class="inp" onchange="fillWil('kec')" aria-label="Kecamatan"></select>
@@ -793,11 +795,18 @@ function dataCetak() {
 }
 const gandaTotal = () => ADATA.filter(d => d.ganda).length;
 function infoCetak() {
-  const { rows } = dataCetak(), g = gandaTotal();
-  $('cetakInfo').textContent = rows.length + ' data akan dicetak' + (g ? ' · Tombol Lihat pdf aktif setelah ' + g + ' data ganda ditangani (menu Data Konstituen).' : '');
-  const b = $('btnPdfAdmin');
-  if (b) { b.disabled = g > 0; b.title = g > 0 ? 'Tersedia setelah tidak ada data ganda' : ''; }
+  const { rows } = dataCetak();
+  $('cetakInfo').textContent = rows.length + ' data akan dicetak';
+  updFiturCetak();
   if (lihatInlineAktif) renderLihatInline();
+}
+// Ikon Unduh Data di Fitur Utama (admin) nonaktif selama masih ada data ganda
+function updFiturCetak() {
+  const g = gandaTotal(), b = document.querySelector('#v-admin [data-fitur="cetak"]');
+  if (!b) return;
+  b.disabled = g > 0;
+  b.title = g > 0 ? 'Tidak aktif: masih ada ' + g + ' data ganda. Tangani dulu di Data Konstituen.' : '';
+  if (g > 0 && AFITUR === 'cetak') pilihFiturAdmin('cetak');   // bila sedang terbuka, tutup
 }
 function cetakAdmin() {
   const g = gandaTotal();
